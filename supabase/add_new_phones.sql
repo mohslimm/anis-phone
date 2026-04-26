@@ -14,9 +14,9 @@ BEGIN
     ---------------------------------------------------------------------------
     -- 1. iPhone 15
     ---------------------------------------------------------------------------
-    INSERT INTO public.products (name, slug, description, brand_id, category_id, base_price, condition, is_featured)
-    VALUES ('iPhone 15', 'iphone-15', 'L''iPhone 15 avec Dynamic Island et un appareil photo 48 Mpx.', apple_id, smartphone_id, 159000, 'new', true)
-    ON CONFLICT (slug) DO UPDATE SET base_price = 159000
+    INSERT INTO public.products (name, slug, description, brand_id, category_id, base_price, images, condition, is_featured)
+    VALUES ('iPhone 15', 'iphone-15', 'L''iPhone 15 avec Dynamic Island et un appareil photo 48 Mpx.', apple_id, smartphone_id, 159000, '["/products/iphone-15.jpg"]'::jsonb, 'new', true)
+    ON CONFLICT (slug) DO UPDATE SET base_price = 159000, images = '["/products/iphone-15.jpg"]'::jsonb
     RETURNING id INTO product_id;
 
     INSERT INTO public.variants (product_id, label, storage, color, price_offset, stock_qty)
@@ -26,9 +26,9 @@ BEGIN
     ---------------------------------------------------------------------------
     -- 2. iPhone 16
     ---------------------------------------------------------------------------
-    INSERT INTO public.products (name, slug, description, brand_id, category_id, base_price, condition, is_featured)
-    VALUES ('iPhone 16', 'iphone-16', 'Le dernier cri de l''innovation par Apple.', apple_id, smartphone_id, 178000, 'new', true)
-    ON CONFLICT (slug) DO UPDATE SET base_price = 178000
+    INSERT INTO public.products (name, slug, description, brand_id, category_id, base_price, images, condition, is_featured)
+    VALUES ('iPhone 16', 'iphone-16', 'Le dernier cri de l''innovation par Apple.', apple_id, smartphone_id, 178000, '["/products/iphone-16.jpg"]'::jsonb, 'new', true)
+    ON CONFLICT (slug) DO UPDATE SET base_price = 178000, images = '["/products/iphone-16.jpg"]'::jsonb
     RETURNING id INTO product_id;
 
     INSERT INTO public.variants (product_id, label, storage, color, price_offset, stock_qty)
@@ -40,9 +40,9 @@ BEGIN
     ---------------------------------------------------------------------------
     -- 3. iPhone 14 Plus
     ---------------------------------------------------------------------------
-    INSERT INTO public.products (name, slug, description, brand_id, category_id, base_price, condition, is_featured)
-    VALUES ('iPhone 14 Plus', 'iphone-14-plus', 'Plus d''autonomie et un plus grand écran.', apple_id, smartphone_id, 176000, 'new', false)
-    ON CONFLICT (slug) DO UPDATE SET base_price = 176000
+    INSERT INTO public.products (name, slug, description, brand_id, category_id, base_price, images, condition, is_featured)
+    VALUES ('iPhone 14 Plus', 'iphone-14-plus', 'Plus d''autonomie et un plus grand écran.', apple_id, smartphone_id, 176000, '["/products/iphone-14-plus.jpg"]'::jsonb, 'new', false)
+    ON CONFLICT (slug) DO UPDATE SET base_price = 176000, images = '["/products/iphone-14-plus.jpg"]'::jsonb
     RETURNING id INTO product_id;
 
     INSERT INTO public.variants (product_id, label, storage, color, price_offset, stock_qty)
@@ -52,9 +52,9 @@ BEGIN
     ---------------------------------------------------------------------------
     -- 4. iPhone 15 Plus
     ---------------------------------------------------------------------------
-    INSERT INTO public.products (name, slug, description, brand_id, category_id, base_price, condition, is_featured)
-    VALUES ('iPhone 15 Plus', 'iphone-15-plus', 'Le grand écran accessible.', apple_id, smartphone_id, 178000, 'new', true)
-    ON CONFLICT (slug) DO UPDATE SET base_price = 178000
+    INSERT INTO public.products (name, slug, description, brand_id, category_id, base_price, images, condition, is_featured)
+    VALUES ('iPhone 15 Plus', 'iphone-15-plus', 'Le grand écran accessible.', apple_id, smartphone_id, 178000, '["/products/iphone-15-plus.jpg"]'::jsonb, 'new', true)
+    ON CONFLICT (slug) DO UPDATE SET base_price = 178000, images = '["/products/iphone-15-plus.jpg"]'::jsonb
     RETURNING id INTO product_id;
 
     INSERT INTO public.variants (product_id, label, storage, color, price_offset, stock_qty)
@@ -68,9 +68,9 @@ BEGIN
     ---------------------------------------------------------------------------
     -- 5. iPhone 15 Pro Max
     ---------------------------------------------------------------------------
-    INSERT INTO public.products (name, slug, description, brand_id, category_id, base_price, condition, is_featured)
-    VALUES ('iPhone 15 Pro Max', 'iphone-15-pro-max', 'Le summum de l''iPhone avec titane de qualité aérospatiale.', apple_id, smartphone_id, 272000, 'new', true)
-    ON CONFLICT (slug) DO UPDATE SET base_price = 272000
+    INSERT INTO public.products (name, slug, description, brand_id, category_id, base_price, images, condition, is_featured)
+    VALUES ('iPhone 15 Pro Max', 'iphone-15-pro-max', 'Le summum de l''iPhone avec titane de qualité aérospatiale.', apple_id, smartphone_id, 272000, '["/products/iphone-15-pro-max.jpg"]'::jsonb, 'new', true)
+    ON CONFLICT (slug) DO UPDATE SET base_price = 272000, images = '["/products/iphone-15-pro-max.jpg"]'::jsonb
     RETURNING id INTO product_id;
 
     INSERT INTO public.variants (product_id, label, storage, color, price_offset, stock_qty)
@@ -80,9 +80,9 @@ BEGIN
     ---------------------------------------------------------------------------
     -- 6. iPhone 17 Pro
     ---------------------------------------------------------------------------
-    INSERT INTO public.products (name, slug, description, brand_id, category_id, base_price, condition, is_featured)
-    VALUES ('iPhone 17 Pro', 'iphone-17-pro', 'L''avenir est entre vos mains.', apple_id, smartphone_id, 320000, 'new', true)
-    ON CONFLICT (slug) DO UPDATE SET base_price = 320000
+    INSERT INTO public.products (name, slug, description, brand_id, category_id, base_price, images, condition, is_featured)
+    VALUES ('iPhone 17 Pro', 'iphone-17-pro', 'L''avenir est entre vos mains.', apple_id, smartphone_id, 320000, '["/products/iphone-17-pro.png"]'::jsonb, 'new', true)
+    ON CONFLICT (slug) DO UPDATE SET base_price = 320000, images = '["/products/iphone-17-pro.png"]'::jsonb
     RETURNING id INTO product_id;
 
     INSERT INTO public.variants (product_id, label, storage, color, price_offset, stock_qty)
@@ -94,9 +94,9 @@ BEGIN
     ---------------------------------------------------------------------------
     -- 7. iPhone 17 Pro Max
     ---------------------------------------------------------------------------
-    INSERT INTO public.products (name, slug, description, brand_id, category_id, base_price, condition, is_featured)
-    VALUES ('iPhone 17 Pro Max', 'iphone-17-pro-max', 'Le nec plus ultra technologique.', apple_id, smartphone_id, 369000, 'new', true)
-    ON CONFLICT (slug) DO UPDATE SET base_price = 369000
+    INSERT INTO public.products (name, slug, description, brand_id, category_id, base_price, images, condition, is_featured)
+    VALUES ('iPhone 17 Pro Max', 'iphone-17-pro-max', 'Le nec plus ultra technologique.', apple_id, smartphone_id, 369000, '["/products/iphone-17-pro-max.png"]'::jsonb, 'new', true)
+    ON CONFLICT (slug) DO UPDATE SET base_price = 369000, images = '["/products/iphone-17-pro-max.png"]'::jsonb
     RETURNING id INTO product_id;
 
     INSERT INTO public.variants (product_id, label, storage, color, price_offset, stock_qty)

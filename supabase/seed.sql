@@ -12,22 +12,22 @@ VALUES
 ON CONFLICT (slug) DO NOTHING;
 
 -- 2. Insert Brands
-INSERT INTO public.brands (name, slug)
+INSERT INTO public.brands (name, slug, logo_url)
 VALUES 
-    ('Apple', 'apple'),
-    ('Samsung', 'samsung'),
-    ('Xiaomi', 'xiaomi'),
-    ('Google', 'google'),
-    ('Oppo', 'oppo'),
-    ('Realme', 'realme'),
-    ('Honor', 'honor'),
-    ('Poco', 'poco'),
-    ('Vivo', 'vivo')
-ON CONFLICT (slug) DO NOTHING;
+    ('Apple', 'apple', '/brands/apple.png'),
+    ('Samsung', 'samsung', '/brands/samsung.png'),
+    ('Xiaomi', 'xiaomi', '/brands/xiaomi.png'),
+    ('Google', 'google', NULL),
+    ('Oppo', 'oppo', '/brands/oppo.png'),
+    ('Realme', 'realme', '/brands/realme.png'),
+    ('Honor', 'honor', '/brands/honor.png'),
+    ('Poco', 'poco', NULL),
+    ('Vivo', 'vivo', NULL)
+ON CONFLICT (slug) DO UPDATE SET logo_url = EXCLUDED.logo_url;
 
 -- 3. Insert Products
 -- Note: UUIDs will be generated. We use subqueries to get the correct foreign keys.
-INSERT INTO public.products (name, slug, description, brand_id, category_id, base_price, promo_price, condition, is_featured)
+INSERT INTO public.products (name, slug, description, brand_id, category_id, base_price, promo_price, images, condition, is_featured)
 VALUES 
     (
         'iPhone 15 Pro Max', 
@@ -37,6 +37,7 @@ VALUES
         (SELECT id FROM public.categories WHERE slug = 'smartphones'), 
         290000, 
         NULL, 
+        '["/products/iphone-15-pro-max.jpg"]'::jsonb,
         'new', 
         true
     ),
@@ -48,6 +49,7 @@ VALUES
         (SELECT id FROM public.categories WHERE slug = 'smartphones'), 
         245000, 
         NULL, 
+        '["/products/samsung-s24-ultra.jpg"]'::jsonb,
         'new', 
         true
     ),
@@ -59,6 +61,7 @@ VALUES
         (SELECT id FROM public.categories WHERE slug = 'laptops'), 
         650000, 
         NULL, 
+        '["/products/macbook-pro-m3-max.jpg"]'::jsonb,
         'new', 
         true
     ),
@@ -70,6 +73,7 @@ VALUES
         (SELECT id FROM public.categories WHERE slug = 'smartwatches'), 
         145000, 
         135000, 
+        '["/products/apple-watch-ultra-2.jpg"]'::jsonb,
         'new', 
         true
     ),
@@ -81,6 +85,7 @@ VALUES
         (SELECT id FROM public.categories WHERE slug = 'smartphones'), 
         125000, 
         NULL, 
+        '["/products/iphone-13-pro-used.jpg"]'::jsonb,
         'used', 
         false
     ),
@@ -92,6 +97,7 @@ VALUES
         (SELECT id FROM public.categories WHERE slug = 'smartphones'), 
         195000, 
         NULL, 
+        '["/products/xiaomi-14-ultra.png"]'::jsonb,
         'new', 
         false
     )
