@@ -1,11 +1,22 @@
--- Create ENUMs for strict typing
-CREATE TYPE user_role AS ENUM ('customer', 'admin');
-CREATE TYPE order_status AS ENUM ('pending', 'confirmed', 'shipped', 'delivered', 'cancelled');
-CREATE TYPE product_condition AS ENUM ('new', 'used');
+-- Create ENUMs only if they don't exist
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
+        CREATE TYPE user_role AS ENUM ('customer', 'admin');
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status') THEN
+        CREATE TYPE order_status AS ENUM ('pending', 'confirmed', 'shipped', 'delivered', 'cancelled');
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'product_condition') THEN
+        CREATE TYPE product_condition AS ENUM ('new', 'used');
+    END IF;
+END $$;
 
 -- 1. PROFILES TABLE
 -- Extended from Supabase Auth Users
-CREATE TABLE public.profiles (
+CREATE TABLE IF NOT EXISTS public.profiles (
     id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
     full_name TEXT,
     phone TEXT,
@@ -15,7 +26,7 @@ CREATE TABLE public.profiles (
 );
 
 -- 2. CATEGORIES TABLE
-CREATE TABLE public.categories (
+CREATE TABLE IF NOT EXISTS public.categories (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     name TEXT NOT NULL,
     slug TEXT NOT NULL UNIQUE,
@@ -25,7 +36,7 @@ CREATE TABLE public.categories (
 );
 
 -- 3. BRANDS TABLE
-CREATE TABLE public.brands (
+CREATE TABLE IF NOT EXISTS public.brands (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     name TEXT NOT NULL,
     slug TEXT NOT NULL UNIQUE,
@@ -33,7 +44,7 @@ CREATE TABLE public.brands (
 );
 
 -- 4. PRODUCTS TABLE
-CREATE TABLE public.products (
+CREATE TABLE IF NOT EXISTS public.products (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     name TEXT NOT NULL,
     slug TEXT NOT NULL UNIQUE,
@@ -50,7 +61,7 @@ CREATE TABLE public.products (
 );
 
 -- 5. VARIANTS TABLE
-CREATE TABLE public.variants (
+CREATE TABLE IF NOT EXISTS public.variants (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     product_id UUID REFERENCES public.products(id) ON DELETE CASCADE NOT NULL,
     label TEXT NOT NULL, -- e.g., "128Go Noir"
@@ -62,7 +73,7 @@ CREATE TABLE public.variants (
 );
 
 -- 6. ORDERS TABLE
-CREATE TABLE public.orders (
+CREATE TABLE IF NOT EXISTS public.orders (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     profile_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
     status order_status DEFAULT 'pending'::order_status NOT NULL,
@@ -75,7 +86,7 @@ CREATE TABLE public.orders (
 );
 
 -- 7. ORDER ITEMS TABLE
-CREATE TABLE public.order_items (
+CREATE TABLE IF NOT EXISTS public.order_items (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     order_id UUID REFERENCES public.orders(id) ON DELETE CASCADE NOT NULL,
     product_id UUID REFERENCES public.products(id) ON DELETE SET NULL,
@@ -85,7 +96,7 @@ CREATE TABLE public.order_items (
 );
 
 -- 8. BANNERS TABLE
-CREATE TABLE public.banners (
+CREATE TABLE IF NOT EXISTS public.banners (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     title TEXT,
     subtitle TEXT,
@@ -120,6 +131,38 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Drop existing policies if they exist to avoid conflicts
+DO $$
+BEGIN
+    -- Profiles policies
+    DROP POLICY IF EXISTS "Users can view their own profile" ON public.profiles;
+    DROP POLICY IF EXISTS "Admins can view all profiles" ON public.profiles;
+    DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
+    
+    -- Catalog policies
+    DROP POLICY IF EXISTS "Categories are publicly viewable" ON public.categories;
+    DROP POLICY IF EXISTS "Brands are publicly viewable" ON public.brands;
+    DROP POLICY IF EXISTS "Products are publicly viewable" ON public.products;
+    DROP POLICY IF EXISTS "Variants are publicly viewable" ON public.variants;
+    DROP POLICY IF EXISTS "Active banners are publicly viewable" ON public.banners;
+    
+    DROP POLICY IF EXISTS "Admins can manage categories" ON public.categories;
+    DROP POLICY IF EXISTS "Admins can manage brands" ON public.brands;
+    DROP POLICY IF EXISTS "Admins can manage products" ON public.products;
+    DROP POLICY IF EXISTS "Admins can manage variants" ON public.variants;
+    DROP POLICY IF EXISTS "Admins can manage banners" ON public.banners;
+    
+    -- Orders policies
+    DROP POLICY IF EXISTS "Users can view their own orders" ON public.orders;
+    DROP POLICY IF EXISTS "Users can insert their own orders" ON public.orders;
+    DROP POLICY IF EXISTS "Admins can manage all orders" ON public.orders;
+    
+    -- Order items policies
+    DROP POLICY IF EXISTS "Users can view their own order items" ON public.order_items;
+    DROP POLICY IF EXISTS "Users can insert their own order items" ON public.order_items;
+    DROP POLICY IF EXISTS "Admins can manage all order items" ON public.order_items;
+END $$;
 
 -- 1. Profiles Policies
 CREATE POLICY "Users can view their own profile" 
@@ -189,9 +232,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- Drop existing trigger if it exists
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
 -- Protect role modifications 
 CREATE OR REPLACE FUNCTION public.protect_role_update() 
 RETURNS TRIGGER AS $$
@@ -203,8 +250,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- Drop existing trigger if it exists
+DROP TRIGGER IF EXISTS on_profile_update_protect_role ON public.profiles;
+
 CREATE TRIGGER on_profile_update_protect_role 
 BEFORE UPDATE ON public.profiles 
-FOR EACH ROW EXECUTE FUNCTION public.protect_role_update(); 
- 
- 
+FOR EACH ROW EXECUTE FUNCTION public.protect_role_update();

@@ -1,0 +1,2 @@
+URL : https://iiyrhapcnantuypwfjku.supabase.co/rest/v1/
+ANON : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpeXJoYXBjbmFudHV5cHdmamt1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MjAwNzMsImV4cCI6MjA5MjM5NjA3M30.eQtu8imQDvOC9eZS2chuZ0LKNwQuh6Cp-n_FEi6Eg04

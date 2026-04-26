@@ -1,0 +1,23 @@
+{
+  "name": "Anis Phone",
+  "short_name": "AnisPhone",
+  "description": "Boutique de smartphones et accessoires premium en Algérie",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a1a1a",
+  "icons": [
+    {
+      "src": "/anis-phone-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/anis-phone-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request: {
       headers: request.headers,
@@ -34,14 +34,14 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
-  const isAuthRoute = request.nextUrl.pathname.startsWith("/login") || request.nextUrl.pathname.startsWith("/register");
+  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin") && !request.nextUrl.pathname.startsWith("/admin/login");
+  const isAuthRoute = request.nextUrl.pathname.startsWith("/admin/login") || request.nextUrl.pathname.startsWith("/login");
 
   // Authentication checking system for Admin routes
   if (isAdminRoute) {
     if (!user) {
       // Redirect to login if user is not authenticated
-      const url = new URL("/login", request.url);
+      const url = new URL("/admin/login", request.url);
       url.searchParams.set("next", request.nextUrl.pathname);
       return NextResponse.redirect(url);
     }
@@ -54,8 +54,13 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Redirect signed-in users away from auth pages
+  // Redirect signed-in admin users from /admin/login to /admin/dashboard
   if (user && isAuthRoute) {
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (user.email === adminEmail) {
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+    }
+    // Regular users logged in: redirect to homepage
     return NextResponse.redirect(new URL("/", request.url));
   }
 
