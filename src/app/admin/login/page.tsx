@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -18,6 +18,17 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/admin/dashboard";
 
+  useEffect(() => {
+    const checkSession = async () => {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        router.replace(next);
+      }
+    };
+    checkSession();
+  }, [next, router]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -25,19 +36,29 @@ function LoginForm() {
 
     const supabase = createClient();
     
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setError("Identifiants incorrects. Veuillez réessayer.");
+      if (error) {
+        setError(error.message === "Invalid login credentials" ? "Identifiants incorrects. Veuillez réessayer." : error.message);
+        setIsLoading(false);
+        return;
+      }
+
+      if (data.session) {
+        // Force a small delay to ensure cookie is set before redirect
+        router.refresh();
+        setTimeout(() => {
+          router.replace(next);
+        }, 500);
+      }
+    } catch (err) {
+      setError("Une erreur inattendue est survenue.");
       setIsLoading(false);
-      return;
     }
-
-    router.refresh();
-    router.replace(next);
   };
 
   return (
