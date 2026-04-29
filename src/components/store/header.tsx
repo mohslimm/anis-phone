@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/store/useCartStore";
 import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { motion } from "framer-motion";
 
 const navLinks = [
   {
@@ -37,18 +38,13 @@ export function Header() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-40 w-full transition-all duration-500 ${
+      className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 ${
         scrolled
-          ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-black/5"
+          ? "bg-white/80 backdrop-blur-xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border-b border-black/5"
           : "bg-white border-b border-black/5"
       }`}
     >
-      {/* ── ROW 1 : TOP BANNER ───────────────────────────────────── */}
-      <div className="bg-luxury-charcoal text-white text-[10px] py-1.5 text-center tracking-[0.25em] uppercase font-medium">
-        Livraison Première 58 Wilayas&nbsp;&nbsp;|&nbsp;&nbsp;Garantie Excellence&nbsp;&nbsp;|&nbsp;&nbsp;Paiement à la livraison
-      </div>
-
-      {/* ── ROW 2 : LOGO + SEARCH + ACTIONS ─────────────────────── */}
+      {/* ── LOGO + SEARCH + ACTIONS ─────────────────────── */}
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 gap-4">
 
@@ -93,29 +89,48 @@ export function Header() {
             </Sheet>
 
             {/* Logo */}
-            <Link href="/" className="group flex items-center gap-2">
-              <Image
-                src="/anis-phone-logo.png"
-                alt="ANIS PHONE Logo"
-                width={60}
-                height={20}
-                className="object-contain"
-              />
+            <Link href="/" className="group flex items-center gap-3">
+              <div className="relative">
+                <div className="relative w-11 h-11 bg-luxury-charcoal rounded-xl flex items-center justify-center overflow-hidden transition-all duration-500 group-hover:scale-105 group-hover:shadow-[0_0_20px_rgba(15,23,42,0.15)]">
+                  <Image
+                    src="/anis-phone-logo-new.png"
+                    alt="ANIS PHONE Logo"
+                    width={40}
+                    height={40}
+                    className="object-contain"
+                  />
+                  {/* Subtle shine effect */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 -translate-x-full"
+                    animate={{ translateX: ["100%", "-100%"] }}
+                    transition={{ repeat: Infinity, duration: 3, ease: "linear", repeatDelay: 2 }}
+                  />
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-amber-500 border-2 border-white rounded-full" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[14px] font-extrabold tracking-[0.25em] leading-tight text-luxury-charcoal uppercase font-outfit">
+                  Anis<span className="text-amber-600">.</span>Phone
+                </span>
+                <span className="text-[9px] font-bold tracking-[0.4em] text-luxury-gray uppercase opacity-80">
+                  L'excellence Mobile
+                </span>
+              </div>
             </Link>
           </div>
 
           {/* Search Bar — Desktop */}
           <div className="hidden sm:flex flex-1 max-w-md relative mx-8">
             <div
-              className={`flex w-full items-center gap-2 border-b pb-1 transition-all duration-300 ${
-                isSearchFocused ? "border-luxury-charcoal" : "border-black/10"
+              className={`flex w-full items-center gap-3 px-4 py-2 bg-luxury-offwhite border transition-all duration-300 rounded-2xl ${
+                isSearchFocused ? "border-luxury-charcoal/20 ring-4 ring-luxury-charcoal/5 bg-white" : "border-black/5"
               }`}
             >
-              <Search className="w-4 h-4 text-luxury-gray shrink-0 stroke-[1.5]" />
+              <Search className="w-4 h-4 text-luxury-gray shrink-0 stroke-[2]" />
               <Input
                 type="search"
-                placeholder="Explorer notre catalogue..."
-                className="border-0 bg-transparent h-8 px-0 focus-visible:ring-0 shadow-none rounded-none placeholder:text-luxury-gray font-light text-sm text-luxury-charcoal"
+                placeholder="Rechercher un modèle, une marque..."
+                className="border-0 bg-transparent h-6 px-0 focus-visible:ring-0 shadow-none rounded-none placeholder:text-luxury-gray/60 font-medium text-[13px] text-luxury-charcoal"
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => setIsSearchFocused(false)}
               />
@@ -159,7 +174,7 @@ export function Header() {
               <div className="relative">
                 <ShoppingBag className="w-5 h-5 stroke-[1.5]" />
                 {cartCount > 0 && (
-                  <Badge className="absolute -top-2 -right-2 bg-luxury-charcoal text-white min-w-[16px] h-[16px] p-0 flex items-center justify-center text-[9px] font-medium border-none rounded-none">
+                  <Badge className="absolute -top-1.5 -right-1.5 bg-red-500 text-white min-w-[18px] h-[18px] p-0 flex items-center justify-center text-[10px] font-bold border-2 border-white rounded-full shadow-sm">
                     {cartCount}
                   </Badge>
                 )}
@@ -169,56 +184,6 @@ export function Header() {
               </span>
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* ── ROW 3 : NAVIGATION BAR ───────────────────────────────── */}
-      <div className="hidden lg:block border-t border-black/5">
-        <div className="container mx-auto px-4">
-          <nav className="flex items-center gap-0 h-10 text-[11px] font-medium uppercase tracking-[0.12em]">
-            {/* Affaire du Jour — special pill */}
-            <Link
-              href="/promos"
-              className="flex items-center gap-1.5 px-4 h-full text-red-500 hover:bg-red-50 transition-colors border-r border-black/5 shrink-0"
-            >
-              <span className="text-base leading-none">%</span>
-              Affaire du jour
-            </Link>
-
-            {/* Main nav links */}
-            {navLinks.map((link) => (
-              <div key={link.href} className="relative group h-full">
-                <Link
-                  href={link.href}
-                  className={`flex items-center gap-1 px-4 h-full whitespace-nowrap transition-colors hover:bg-black/3 ${
-                    link.highlight
-                      ? "text-amber-500 hover:text-amber-600"
-                      : "text-luxury-charcoal hover:text-black"
-                  }`}
-                >
-                  {link.label}
-                  {link.children && (
-                    <ChevronDown className="w-3 h-3 opacity-50 group-hover:opacity-100 transition-opacity" />
-                  )}
-                </Link>
-
-                {/* Mega dropdown for Smartphones */}
-                {link.children && (
-                  <div className="absolute top-full left-0 hidden group-hover:grid grid-cols-2 gap-x-8 gap-y-2 bg-white border border-black/5 shadow-2xl p-6 w-56 z-50">
-                    {link.children.map((child) => (
-                      <Link
-                        key={child}
-                        href={`/categorie/smartphones/${child.toLowerCase()}`}
-                        className="text-luxury-charcoal font-light text-[11px] hover:text-black hover:pl-1 transition-all py-1"
-                      >
-                        {child}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </nav>
         </div>
       </div>
 

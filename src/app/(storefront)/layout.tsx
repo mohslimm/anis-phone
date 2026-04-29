@@ -11,11 +11,13 @@ export default function StorefrontLayout({
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
       <Header />
-      <Navigation />
-      <CartDrawer />
-      <main className="flex-1">
-        {children}
-      </main>
+      <div className="pt-16">
+        <Navigation />
+        <CartDrawer />
+        <main className="flex-1">
+          {children}
+        </main>
+      </div>
       <Footer />
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import Image from "next/image";
 import { useCartStore } from "@/store/useCartStore";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,8 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/format";
 
-export default function ProductDetailPage({ params }: { params: { slug: string } }) {
+export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const resolvedParams = use(params);
   const [product, setProduct] = useState<any>(null);
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [activeImage, setActiveImage] = useState(0);
@@ -25,7 +26,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
       const { data, error } = await supabase
         .from("products")
         .select("*, brands(name), variants(*)")
-        .eq("slug", params.slug)
+        .eq("slug", resolvedParams.slug)
         .single();
 
       if (data) {
@@ -38,7 +39,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
     };
 
     fetchProduct();
-  }, [params.slug]);
+  }, [resolvedParams.slug]);
 
   const handleAddToCart = () => {
     if (!product) return;

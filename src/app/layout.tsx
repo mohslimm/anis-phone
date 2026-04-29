@@ -33,6 +33,7 @@ export default function RootLayout({
     <html
       lang="fr"
       className={`${inter.variable} ${outfit.variable} h-full antialiased selection:bg-black/10`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col font-sans">
         <SmoothScrollProvider>

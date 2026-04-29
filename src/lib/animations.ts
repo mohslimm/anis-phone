@@ -33,9 +33,13 @@ export const revealFromBottom = (element: Element | string, delay: number = 0) =
     gsap.set(element, { opacity: 1, y: 0 });
     return;
   }
+
+  // Check if element exists before animating
+  const target = typeof element === "string" ? document.querySelector(element) : element;
+  if (!target) return;
   
   gsap.fromTo(
-    element,
+    target,
     { opacity: 0, y: 30 },
     {
       opacity: 1,
@@ -44,7 +48,7 @@ export const revealFromBottom = (element: Element | string, delay: number = 0) =
       ease: ANIMATION_CONFIG.easings.entrance,
       delay: delay,
       scrollTrigger: {
-        trigger: element,
+        trigger: target as any,
         start: "top 85%", // Démarre quand le top est à 85% de la fenêtre
         toggleActions: "play none none reverse", // Se joue à l'entrée, s'inverse si on remonte haut
       },
@@ -57,9 +61,13 @@ export const staggerReveal = (elements: Element[] | string, staggerAmount: numbe
     gsap.set(elements, { opacity: 1, y: 0 });
     return;
   }
+
+  // Check if elements exist before animating
+  const targets = typeof elements === "string" ? document.querySelectorAll(elements) : elements;
+  if (!targets || (Array.isArray(targets) && targets.length === 0) || (targets instanceof NodeList && targets.length === 0)) return;
   
   gsap.fromTo(
-    elements,
+    targets,
     { opacity: 0, y: 30 },
     {
       opacity: 1,
@@ -68,7 +76,7 @@ export const staggerReveal = (elements: Element[] | string, staggerAmount: numbe
       ease: ANIMATION_CONFIG.easings.entrance,
       stagger: staggerAmount,
       scrollTrigger: {
-        trigger: elements,
+        trigger: targets[0] as any, // Use the first element as trigger
         start: "top 85%",
       },
     }
