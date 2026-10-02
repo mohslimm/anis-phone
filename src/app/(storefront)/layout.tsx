@@ -1,5 +1,4 @@
 import { Header } from "@/components/store/header";
-import { Navigation } from "@/components/store/navigation";
 import { CartDrawer } from "@/components/store/cart-drawer";
 import { Footer } from "@/components/store/footer";
 
@@ -9,9 +8,8 @@ export default function StorefrontLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50">
+    <div className="flex min-h-screen flex-col bg-slate-50 overflow-x-hidden">
       <Header />
-      <Navigation />
       <CartDrawer />
       <main className="flex-1">
         {children}

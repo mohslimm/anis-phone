@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ui/product-card";
+import { ProductGrid } from "@/components/ui/product-grid";
+import { BannerCarousel } from "@/components/ui/banner-carousel";
 import { ArrowRight, Truck, ShieldCheck, CheckCircle } from "lucide-react";
 import { useRef, useLayoutEffect } from "react";
 import { gsap } from "gsap";
@@ -12,31 +14,18 @@ import { revealFromBottom, registerGSAP, staggerReveal } from "@/lib/animations"
 import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/format";
 import { useEffect, useState } from "react";
+import { DataService, Brand } from "@/lib/data-service";
 
 export default function HomePage() {
   const container = useRef<HTMLDivElement>(null);
-  const [newArrivals, setNewArrivals] = useState<any[]>([]);
-  const [usedProducts, setUsedProducts] = useState<any[]>([]);
-  const [brands, setBrands] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [brands, setBrands] = useState<Brand[]>([]);
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      const supabase = createClient();
-      
-      const [pdNew, pdUsed, brRes] = await Promise.all([
-        supabase.from("products").select("*, brands(name)").eq("condition", "new").order("created_at", { ascending: false }).limit(4),
-        supabase.from("products").select("*, brands(name)").eq("condition", "used").order("created_at", { ascending: false }).limit(4),
-        supabase.from("brands").select("*").limit(6),
-      ]);
-
-      if (pdNew.data) setNewArrivals(pdNew.data);
-      if (pdUsed.data) setUsedProducts(pdUsed.data);
-      if (brRes.data) setBrands(brRes.data);
-      setIsLoading(false);
+    const fetchBrands = async () => {
+      const data = await DataService.getBrands();
+      setBrands(data.slice(0, 6));
     };
-
-    fetchInitialData();
+    fetchBrands();
   }, []);
 
   useLayoutEffect(() => {
@@ -44,41 +33,35 @@ export default function HomePage() {
     if (!container.current) return;
     
     const ctx = gsap.context(() => {
-      // Hero entrance animations
-      gsap.fromTo(
-        ".hero-title",
-        { y: 50, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1.2, ease: "power4.out", stagger: 0.15, delay: 0.1 }
-      );
-      gsap.fromTo(
-        ".hero-subtitle",
-        { y: 20, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1, ease: "power3.out", delay: 0.6 }
-      );
-      gsap.fromTo(
-        ".hero-button",
-        { y: 20, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.8, ease: "power2.out", delay: 0.8 }
-      );
-      gsap.fromTo(
-        ".hero-image-wrapper",
-        { scale: 0.95, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 1.5, ease: "power3.out", delay: 0.4 }
-      );
+      let mm = gsap.matchMedia();
+
+      mm.add("(min-width: 1px)", () => {
+        // Hero entrance animations
+        gsap.to(".hero-title", {
+          y: 0, opacity: 1, duration: 1.2, ease: "power4.out", stagger: 0.15, delay: 0.1
+        });
+        gsap.to(".hero-subtitle", {
+          y: 0, opacity: 1, duration: 1, ease: "power3.out", delay: 0.6
+        });
+        gsap.to(".hero-button", {
+          y: 0, opacity: 1, duration: 0.8, ease: "power2.out", delay: 0.8
+        });
+        gsap.to(".hero-image-wrapper", {
+          scale: 1, opacity: 1, duration: 1.5, ease: "power3.out", delay: 0.4
+        });
+      });
 
       // Scroll triggers setup
       revealFromBottom(".trust-badges");
       revealFromBottom(".marques-section");
       staggerReveal(".marque-card", 0.05);
       revealFromBottom(".deal-section");
-      revealFromBottom(".arrivals-header");
-      staggerReveal(".arrival-card", 0.1);
-      revealFromBottom(".used-header");
-      staggerReveal(".used-card", 0.1);
+      revealFromBottom(".arrivals-section");
+      revealFromBottom(".heritage-section");
 
     }, container);
     return () => ctx.revert();
-  }, [isLoading]);
+  }, []);
 
   return (
     <div ref={container} className="flex flex-col pb-24 bg-luxury-offwhite text-luxury-charcoal selection:bg-black/10 min-h-screen">
@@ -87,22 +70,22 @@ export default function HomePage() {
       <section className="relative w-full min-h-[90svh] flex flex-col md:flex-row items-center container mx-auto px-6 pt-24 pb-12 gap-12 overflow-hidden">
         
         <div className="w-full md:w-1/2 flex flex-col justify-center items-start z-10 space-y-8">
-          <div className="hero-subtitle inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-black/5 text-luxury-charcoal font-medium text-xs tracking-widest uppercase border border-black/5">
+          <div className="hero-subtitle opacity-0 translate-y-[20px] inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-black/5 text-luxury-charcoal font-medium text-xs tracking-widest uppercase border border-black/5">
             <span className="w-2 h-2 rounded-full bg-black"></span>
             L'excellence technologique
           </div>
           
           <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-light leading-[1.05] tracking-tight text-luxury-charcoal font-outfit">
-            <div className="overflow-hidden"><span className="hero-title block font-semibold">Smartphones,</span></div>
-            <div className="overflow-hidden"><span className="hero-title block">Informatique &</span></div>
-            <div className="overflow-hidden"><span className="hero-title block italic text-luxury-gray">Lifestyle.</span></div>
+            <div className="overflow-hidden"><span className="hero-title opacity-0 translate-y-[50px] block font-semibold">Smartphones,</span></div>
+            <div className="overflow-hidden"><span className="hero-title opacity-0 translate-y-[50px] block">Informatique &</span></div>
+            <div className="overflow-hidden"><span className="hero-title opacity-0 translate-y-[50px] block italic text-luxury-gray">Lifestyle.</span></div>
           </h1>
           
-          <p className="hero-subtitle text-lg md:text-xl text-luxury-gray max-w-md font-sans font-light leading-relaxed">
+          <p className="hero-subtitle opacity-0 translate-y-[20px] text-lg md:text-xl text-luxury-gray max-w-md font-sans font-light leading-relaxed">
             Une sélection rigoureuse d'appareils haut de gamme. Neuf garanti et occasions certifiées, livrés élégamment partout en Algérie.
           </p>
           
-          <div className="hero-button pt-4">
+          <div className="hero-button opacity-0 translate-y-[20px] pt-4">
             <Button size="lg" className="bg-luxury-charcoal text-white hover:bg-black hover:scale-105 active:scale-95 transition-all duration-300 h-14 px-8 text-sm uppercase tracking-widest rounded-none">
               Découvrir la collection
             </Button>
@@ -110,12 +93,13 @@ export default function HomePage() {
         </div>
 
         <div className="w-full md:w-1/2 flex justify-center items-center h-full relative">
-          <div className="hero-image-wrapper relative w-full max-w-[500px] aspect-[4/5] bg-luxury-sand overflow-hidden shadow-2xl">
+          <div className="hero-image-wrapper opacity-0 scale-95 relative w-full max-w-[500px] aspect-[4/5] bg-luxury-sand overflow-hidden shadow-2xl rounded-none">
             <Image 
-              src="/images/anis-phone-logo.png" 
-              alt="Anis Phone" 
-              fill 
-              className="object-contain p-48 opacity-20"
+              src="/hero/phone-aesthetic.jpg" 
+              alt="Premium Smartphone" 
+              fill
+              priority
+              className="object-cover"
             />
           </div>
         </div>
@@ -148,7 +132,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <div className="space-y-32 pt-24">
+      <div className="space-y-12 pt-24">
         {/* Acheter par Marque */}
         <section className="marques-section container mx-auto px-6">
           <div className="flex flex-col items-center text-center mb-16">
@@ -169,59 +153,27 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Nouveaux Arrivages */}
-        <section className="container mx-auto px-6">
-          <div className="arrivals-header flex flex-col sm:flex-row items-center justify-between mb-16 border-b border-black/10 pb-6 gap-4">
-            <h2 className="font-outfit text-3xl font-light">Nouveautés</h2>
-            <Link href="/nouveautes" className="text-xs font-semibold uppercase tracking-widest hover:text-luxury-gray transition-colors flex items-center group">
-              Collection complète <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {newArrivals.map(product => (
-              <div key={product.id} className="arrival-card">
-                <ProductCard 
-                  {...product} 
-                  slug={product.slug}
-                  brand={product.brands?.name || ""}
-                  price={product.base_price}
-                  promoPrice={product.promo_price}
-                  image={product.images?.[0] || ""} 
-                />
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* Nouveaux Arrivages via ProductGrid */}
+        <div className="arrivals-section">
+          <ProductGrid 
+            title="Nouveautés" 
+            condition="new" 
+            limit={4} 
+            viewAllLink="/nouveautes"
+          />
+        </div>
 
-        {/* Occasions Premium */}
-        <section className="container mx-auto px-6">
-          <div className="used-header flex flex-col sm:flex-row items-center justify-between mb-16 border-b border-black/10 pb-6 gap-4">
-            <div>
-              <h2 className="font-outfit text-3xl font-light mb-2">Heritage Collection</h2>
-              <p className="text-sm text-luxury-gray">Modèles d'occasion certifiés par nos techniciens.</p>
-            </div>
-            <Link href="/occasions" className="text-xs font-semibold uppercase tracking-widest hover:text-luxury-gray transition-colors flex items-center group">
-              Toutes les offres <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {usedProducts.map(product => (
-              <div key={product.id} className="used-card">
-                <ProductCard 
-                  {...product} 
-                  slug={product.slug}
-                  brand={product.brands?.name || ""}
-                  price={product.base_price}
-                  promoPrice={product.promo_price}
-                  image={product.images?.[0] || ""} 
-                />
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* Heritage Collection via ProductGrid */}
+        <div className="heritage-section">
+          <ProductGrid 
+            title="Heritage Collection" 
+            condition="used" 
+            limit={4} 
+            viewAllLink="/occasions"
+          />
+        </div>
       </div>
     </div>
   );
 }
+

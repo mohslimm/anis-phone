@@ -1,13 +1,13 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ANIMATION_CONFIG, registerGSAP } from "@/lib/animations";
 
 export function PageTransition({ children }: { children: React.ReactNode }) {
   const container = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     registerGSAP();
     
     // Initial page load animation

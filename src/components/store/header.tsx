@@ -2,12 +2,19 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Search, User, ShoppingBag, Menu, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/store/useCartStore";
+import { createClient } from "@/lib/supabase/client";
+import { useDebounce } from "@/hooks/use-debounce";
+import { Loader2, X } from "lucide-react";
+
 import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { formatPrice } from "@/lib/format";
+import { DataService } from "@/lib/data-service";
 
 const navLinks = [
   {
@@ -24,12 +31,61 @@ const navLinks = [
 ];
 
 export function Header() {
-  const { getCartCount, setCartOpen } = useCartStore();
+  const { items, setCartOpen } = useCartStore();
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const cartCount = getCartCount();
+  const [mounted, setMounted] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const debouncedSearch = useDebounce(searchQuery, 300);
+  
+  const cartCount = items.reduce((acc, item) => acc + item.qty, 0);
+  const router = useRouter();
 
   useEffect(() => {
+    const fetchResults = async () => {
+      if (debouncedSearch.length < 2) {
+        setSearchResults([]);
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from("products")
+          .select("id, name, slug, images, base_price, promo_price")
+          .ilike("name", `%${debouncedSearch}%`)
+          .limit(5);
+
+        if (!error && data && data.length > 0) {
+          setSearchResults(data);
+        } else {
+          // Fallback avec DataService instantané
+          const localMatch = await DataService.getProducts({ search: debouncedSearch, limit: 5 });
+          setSearchResults(localMatch);
+        }
+      } catch {
+        const localMatch = await DataService.getProducts({ search: debouncedSearch, limit: 5 });
+        setSearchResults(localMatch);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    fetchResults();
+  }, [debouncedSearch]);
+
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && searchQuery.trim()) {
+      router.push(`/recherche?q=${encodeURIComponent(searchQuery.trim())}`);
+      setIsSearchFocused(false);
+    }
+  };
+
+  useEffect(() => {
+    setMounted(true);
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -81,8 +137,8 @@ export function Header() {
                     <Link
                       key={link.href}
                       href={link.href}
-                      className={`py-1 border-b border-black/5 font-light hover:pl-2 transition-all ${
-                        link.highlight ? "font-medium" : "text-luxury-charcoal"
+                      className={`py-3 border-b border-black/5 font-light hover:pl-2 transition-all block focus-visible:ring-1 focus-visible:ring-luxury-charcoal focus-visible:outline-none ${
+                        link.highlight ? "font-medium text-amber-600" : "text-luxury-charcoal"
                       }`}
                     >
                       {link.label}
@@ -93,7 +149,7 @@ export function Header() {
             </Sheet>
 
             {/* Logo */}
-            <Link href="/" className="group flex items-center gap-2">
+            <Link href="/" className="group flex items-center gap-2 focus-visible:ring-1 focus-visible:ring-luxury-charcoal focus-visible:outline-none">
               <Image
                 src="/anis-phone-logo.png"
                 alt="ANIS PHONE Logo"
@@ -116,27 +172,61 @@ export function Header() {
                 type="search"
                 placeholder="Explorer notre catalogue..."
                 className="border-0 bg-transparent h-8 px-0 focus-visible:ring-0 shadow-none rounded-none placeholder:text-luxury-gray font-light text-sm text-luxury-charcoal"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearch}
                 onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => setIsSearchFocused(false)}
+                onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
               />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery("")} className="p-1 hover:bg-black/5 rounded-full">
+                  <X className="w-3 h-3 text-luxury-gray" />
+                </button>
+              )}
             </div>
 
-            {/* Autocomplete dropdown */}
-            {isSearchFocused && (
-              <div className="absolute top-full left-0 right-0 mt-3 bg-white border border-black/5 shadow-2xl p-5 z-50">
-                <p className="text-[10px] text-luxury-gray font-semibold uppercase tracking-[0.2em] mb-3">
-                  Recherches suggérées
-                </p>
-                {["iPhone 15 Pro Max 256Go", "Samsung Galaxy S24 Ultra", "MacBook Air M2"].map(
-                  (q) => (
-                    <div
-                      key={q}
-                      className="flex items-center gap-3 py-2 cursor-pointer hover:text-luxury-gray transition-colors text-sm font-light"
+            {/* Search Results Dropdown */}
+            {isSearchFocused && (searchQuery.length >= 2) && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-black/5 shadow-2xl z-50 overflow-hidden">
+                {isSearching ? (
+                  <div className="p-4 flex items-center justify-center">
+                    <Loader2 className="w-5 h-5 animate-spin text-luxury-gold" />
+                  </div>
+                ) : searchResults.length > 0 ? (
+                  <div className="flex flex-col">
+                    {searchResults.map((product) => (
+                      <Link
+                        key={product.id}
+                        href={`/produit/${product.slug}`}
+                        className="flex items-center gap-3 p-3 hover:bg-luxury-offwhite transition-colors border-b border-black/5 last:border-0"
+                        onClick={() => setIsSearchFocused(false)}
+                      >
+                        <div className="relative w-12 h-12 bg-luxury-sand shrink-0 overflow-hidden">
+                          {product.images?.[0] ? (
+                            <Image src={product.images[0]} alt={product.name} fill className="object-contain p-1" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-[10px] text-luxury-gray opacity-20">PNG</div>
+                          )}
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[13px] font-medium text-luxury-charcoal truncate">{product.name}</span>
+                          <span className="text-[11px] font-bold text-luxury-gold">
+                            {formatPrice(product.promo_price ?? product.base_price)} DZD
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                    <Link 
+                      href={`/recherche?q=${encodeURIComponent(searchQuery)}`}
+                      className="p-3 text-center text-[10px] uppercase tracking-[0.2em] font-bold text-luxury-charcoal hover:bg-luxury-gold hover:text-white transition-all"
                     >
-                      <span className="w-4 h-[1px] bg-luxury-gray shrink-0" />
-                      {q}
-                    </div>
-                  )
+                      Voir tous les résultats
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="p-4 text-center text-[11px] text-luxury-gray uppercase tracking-widest">
+                    Aucune pièce trouvée
+                  </div>
                 )}
               </div>
             )}
@@ -154,11 +244,11 @@ export function Header() {
 
             <button
               onClick={() => setCartOpen(true)}
-              className="flex items-center gap-1.5 text-luxury-charcoal hover:opacity-60 transition-opacity relative"
+              className="flex items-center gap-1.5 text-luxury-charcoal hover:opacity-60 transition-opacity relative focus-visible:ring-1 focus-visible:ring-luxury-charcoal focus-visible:outline-none"
             >
               <div className="relative">
                 <ShoppingBag className="w-5 h-5 stroke-[1.5]" />
-                {cartCount > 0 && (
+                {mounted && cartCount > 0 && (
                   <Badge className="absolute -top-2 -right-2 bg-luxury-charcoal text-white min-w-[16px] h-[16px] p-0 flex items-center justify-center text-[9px] font-medium border-none rounded-none">
                     {cartCount}
                   </Badge>
@@ -179,7 +269,7 @@ export function Header() {
             {/* Affaire du Jour — special pill */}
             <Link
               href="/promos"
-              className="flex items-center gap-1.5 px-4 h-full text-red-500 hover:bg-red-50 transition-colors border-r border-black/5 shrink-0"
+              className="flex items-center gap-1.5 px-4 h-full text-red-500 hover:bg-red-50 transition-colors border-r border-black/5 shrink-0 focus-visible:ring-1 focus-visible:ring-luxury-charcoal focus-visible:outline-none"
             >
               <span className="text-base leading-none">%</span>
               Affaire du jour
@@ -190,7 +280,7 @@ export function Header() {
               <div key={link.href} className="relative group h-full">
                 <Link
                   href={link.href}
-                  className={`flex items-center gap-1 px-4 h-full whitespace-nowrap transition-colors hover:bg-black/3 ${
+                  className={`flex items-center gap-1 px-4 h-full whitespace-nowrap transition-colors hover:bg-black/3 focus-visible:ring-1 focus-visible:ring-luxury-charcoal focus-visible:outline-none ${
                     link.highlight
                       ? "text-amber-500 hover:text-amber-600"
                       : "text-luxury-charcoal hover:text-black"
@@ -230,6 +320,9 @@ export function Header() {
             type="search"
             placeholder="Rechercher..."
             className="border-0 bg-transparent h-8 px-0 focus-visible:ring-0 shadow-none rounded-none placeholder:text-luxury-gray text-sm"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearch}
           />
         </div>
       </div>

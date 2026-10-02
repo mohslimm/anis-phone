@@ -29,6 +29,12 @@ export const shouldReduceMotion = () => {
 
 // Helper pour des révélations (Fade + Y)
 export const revealFromBottom = (element: Element | string, delay: number = 0) => {
+  if (typeof window === "undefined") return;
+
+  // Check if target exists to avoid GSAP warnings
+  const target = typeof element === "string" ? document.querySelector(element) : element;
+  if (!target) return;
+
   if (shouldReduceMotion()) {
     gsap.set(element, { opacity: 1, y: 0 });
     return;
@@ -53,6 +59,14 @@ export const revealFromBottom = (element: Element | string, delay: number = 0) =
 };
 
 export const staggerReveal = (elements: Element[] | string, staggerAmount: number = 0.1) => {
+  if (typeof window === "undefined") return;
+
+  // Check if targets exist to avoid GSAP warnings
+  const targets = typeof elements === "string" ? document.querySelectorAll(elements) : elements;
+  if (!targets || (targets instanceof NodeList && targets.length === 0) || (Array.isArray(targets) && targets.length === 0)) {
+    return;
+  }
+
   if (shouldReduceMotion()) {
     gsap.set(elements, { opacity: 1, y: 0 });
     return;
@@ -68,7 +82,7 @@ export const staggerReveal = (elements: Element[] | string, staggerAmount: numbe
       ease: ANIMATION_CONFIG.easings.entrance,
       stagger: staggerAmount,
       scrollTrigger: {
-        trigger: elements,
+        trigger: typeof elements === "string" ? (targets as NodeList)[0] as Element : (elements as Element[])[0],
         start: "top 85%",
       },
     }

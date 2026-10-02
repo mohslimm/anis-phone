@@ -58,7 +58,7 @@ export function ImageUpload({ value, onChange, onRemove }: ImageUploadProps) {
     <div className="space-y-4">
       <div className="flex flex-wrap gap-4">
         {value.map((url) => (
-          <div key={url} className="relative w-24 h-24 rounded-lg overflow-hidden border border-[#e9e9e9] group bg-white shadow-sm transition-all hover:shadow-md">
+          <div key={url} className="relative w-24 h-24 rounded-lg overflow-hidden border border-black/10 group bg-white shadow-sm transition-all hover:shadow-md">
             <img draggable={false} src={url} alt="Product" className="w-full h-full object-cover" />
             <button
               onClick={() => onRemove(url)}
@@ -73,7 +73,7 @@ export function ImageUpload({ value, onChange, onRemove }: ImageUploadProps) {
           type="button"
           disabled={isUploading}
           onClick={() => fileInputRef.current?.click()}
-          className="w-24 h-24 rounded-lg border-2 border-dashed border-[#e9e9e9] flex flex-col items-center justify-center gap-1 text-[#9eaab7] hover:border-[#f7bf33] hover:text-[#f7bf33] transition-all bg-white hover:bg-[#faf9f7] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-24 h-24 rounded-lg border-2 border-dashed border-black/10 flex flex-col items-center justify-center gap-1 text-luxury-gray hover:border-luxury-gold hover:text-luxury-gold transition-all bg-white hover:bg-[#faf9f7] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isUploading ? (
             <Loader2 className="w-6 h-6 animate-spin" />
@@ -95,7 +95,7 @@ export function ImageUpload({ value, onChange, onRemove }: ImageUploadProps) {
         onChange={handleUpload}
       />
       
-      <p className="text-[11px] text-[#9eaab7]">
+      <p className="text-[11px] text-luxury-gray">
         Extensions autorisées: JPG, PNG, WEBP. Plusieurs photos permises.
       </p>
     </div>

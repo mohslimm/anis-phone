@@ -54,7 +54,7 @@ export function ProductCard({
   };
 
   return (
-    <Link href={`/produit/${slug}`}>
+    <Link href={`/produit/${slug}`} className="block focus-visible:ring-2 focus-visible:ring-luxury-charcoal focus-visible:outline-none">
       <div 
         className="group relative flex flex-col bg-white border border-black/5 overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2"
       >
