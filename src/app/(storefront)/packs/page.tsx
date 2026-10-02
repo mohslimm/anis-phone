@@ -90,42 +90,43 @@ export default function PacksPage() {
                   </p>
                 </div>
 
-                {/* Inclusions */}
-                <div className="p-4 bg-luxury-sand/50 border border-black/5 space-y-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-luxury-charcoal block">
-                    Inclus dans ce pack d&apos;exception :
-                  </span>
-                  <ul className="text-xs text-luxury-gray space-y-1.5">
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span>{pack.specs?.inclus || "Appareil sous blister + Accessoires officiels"}</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span>Garantie Anis Phone : {pack.specs?.garantie || "12 Mois de couverture"}</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span>Expédition sécurisée : {pack.specs?.livraison || "58 Wilayas en express"}</span>
-                    </li>
-                  </ul>
+                {/* Included Features */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-2 border-y border-black/5 text-xs text-luxury-charcoal">
+                  <div className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-[#c5a059]" />
+                    <span>Garantie 12 Mois Pièces & Main d&apos;œuvre</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-[#c5a059]" />
+                    <span>Livraison Express 58 Wilayas</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-[#c5a059]" />
+                    <span>Paiement à la livraison après inspection</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-[#c5a059]" />
+                    <span>Accessoires certifiés 100% originaux</span>
+                  </div>
                 </div>
 
-                {/* Price and CTA */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 border-t border-black/5">
+                {/* Price & CTA */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
                   <div>
-                    <span className="text-xs text-luxury-gray line-through block font-mono">
-                      {formatPrice(pack.base_price)} DZD
-                    </span>
-                    <span className="text-2xl font-outfit font-bold text-luxury-charcoal font-mono">
-                      {formatPrice(pack.promo_price || pack.base_price)} DZD
-                    </span>
+                    <div className="text-2xl md:text-3xl font-outfit font-semibold text-luxury-charcoal">
+                      {formatPrice(pack.promo_price || pack.base_price)} <span className="text-xs font-normal">DZD</span>
+                    </div>
+                    {pack.promo_price && (
+                      <span className="text-xs text-luxury-gray line-through">
+                        {formatPrice(pack.base_price)} DZD
+                      </span>
+                    )}
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <Button
+                  <div className="flex gap-3">
+                    <Button 
                       onClick={() => handleAddPack(pack)}
-                      className="h-12 px-6 bg-luxury-charcoal text-white hover:bg-black rounded-none text-xs uppercase tracking-widest font-semibold"
+                      className="bg-luxury-charcoal hover:bg-black text-white h-12 px-6 rounded-none text-xs uppercase tracking-widest flex items-center"
                     >
                       <ShoppingCart className="w-4 h-4 mr-2" />
                       Commander ce pack

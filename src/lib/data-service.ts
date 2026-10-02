@@ -83,6 +83,7 @@ export interface Order {
   total_dzd: number;
   items_count?: number;
   order_items?: OrderItem[];
+  items?: any[];
 }
 
 export interface Customer {
@@ -107,6 +108,21 @@ export interface WilayaDeliveryRate {
   active: boolean;
 }
 
+export interface AnalyticsSummary {
+  totalRevenue: number;
+  deliveredRevenue: number;
+  pendingOrdersCount: number;
+  confirmedOrdersCount: number;
+  shippedOrdersCount: number;
+  deliveredOrdersCount: number;
+  lowStockCount: number;
+  totalCustomersCount: number;
+  averageOrderValue: number;
+  salesByDay: { day: string; sales: number; orders: number }[];
+  categoryDistribution: { name: string; percentage: number; amount: number; color: string }[];
+  wilayaDistribution: { wilaya: string; count: number; total: number }[];
+}
+
 export interface StoreSettings {
   storeName: string;
   contactEmail: string;
@@ -120,6 +136,10 @@ export interface StoreSettings {
   orderConfirmationSms: boolean;
   maintenanceMode: boolean;
   openingHours: string;
+  storeEmail?: string;
+  storePhone?: string;
+  storeWhatsApp?: string;
+  storeAddress?: string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

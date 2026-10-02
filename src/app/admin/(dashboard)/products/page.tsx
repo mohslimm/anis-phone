@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, Filter, Pencil, Trash2, Loader2, Package, Sparkles, Check } from "lucide-react";
+import Image from "next/image";
+import { Plus, Search, Pencil, Trash2, Loader2, Package, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,7 +20,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -100,8 +100,8 @@ export default function ProductsPage() {
     setEditingId(product.id);
     setFormData({
       name: product.name,
-      brand_id: product.brand_id || "b-apple",
-      category_id: product.category_id || "c-smartphones",
+      brand_id: product.brand_id || brands[0]?.id || "b-apple",
+      category_id: product.category_id || categories[0]?.id || "c-smartphones",
       base_price: product.base_price.toString(),
       promo_price: product.promo_price?.toString() || "",
       description: product.description || "",
@@ -176,269 +176,58 @@ export default function ProductsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-luxury-charcoal font-outfit">
+          <h1 className="text-2xl font-bold tracking-tight text-luxury-charcoal font-outfit uppercase">
             Catalogue de Produits
           </h1>
-          <p className="text-[13px] text-luxury-gray">
-            Gérez votre sélection haut de gamme, tarifs DZD et fiches techniques.
+          <p className="text-xs text-luxury-gray mt-1">
+            Gérez votre sélection officielle, tarifs DZD et fiches techniques.
           </p>
         </div>
 
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogTrigger
-            render={
-              <Button
-                onClick={() => { resetForm(); setIsModalOpen(true); }}
-                className="bg-luxury-charcoal text-white hover:bg-black rounded-none shadow-sm"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Ajouter un appareil
-              </Button>
-            }
-          />
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto border-black/10 rounded-none p-6">
-            <DialogHeader>
-              <DialogTitle className="text-xl font-outfit font-bold">
-                {editingId ? "Modifier l'Appareil" : "Ajouter un Nouvel Appareil"}
-              </DialogTitle>
-            </DialogHeader>
-
-            <div className="grid gap-6 py-4">
-              {/* Informations Générales */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label className="text-xs uppercase tracking-wider text-luxury-gray">Nom du modèle *</Label>
-                  <Input 
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="ex: iPhone 16 Pro Max" 
-                    className="border-black/10 rounded-none"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label className="text-xs uppercase tracking-wider text-luxury-gray">Marque *</Label>
-                  <Select 
-                    value={formData.brand_id} 
-                    onValueChange={(val) => setFormData({ ...formData, brand_id: val || "b-apple" })}
-                  >
-                    <SelectTrigger className="border-black/10 rounded-none">
-                      <SelectValue placeholder="Sélectionner..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {brands.map(b => (
-                        <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Prix */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label className="text-xs uppercase tracking-wider text-luxury-gray">Prix de base (DZD) *</Label>
-                  <Input 
-                    type="number" 
-                    value={formData.base_price}
-                    onChange={(e) => setFormData({ ...formData, base_price: e.target.value })}
-                    placeholder="285000" 
-                    className="border-black/10 rounded-none font-mono"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs uppercase tracking-wider text-luxury-gray">Prix promotionnel (Optionnel)</Label>
-                  <Input 
-                    type="number" 
-                    value={formData.promo_price}
-                    onChange={(e) => setFormData({ ...formData, promo_price: e.target.value })}
-                    placeholder="275000" 
-                    className="border-black/10 rounded-none font-mono"
-                  />
-                </div>
-              </div>
-
-              {/* Catégorie & Condition */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="space-y-1.5">
-                  <Label className="text-xs uppercase tracking-wider text-luxury-gray">Catégorie</Label>
-                  <Select 
-                    value={formData.category_id} 
-                    onValueChange={(val) => setFormData({ ...formData, category_id: val || "c-smartphones" })}
-                  >
-                    <SelectTrigger className="border-black/10 rounded-none">
-                      <SelectValue placeholder="Catégorie" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map(c => (
-                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label className="text-xs uppercase tracking-wider text-luxury-gray">État de l&apos;appareil</Label>
-                  <Select 
-                    value={formData.condition} 
-                    onValueChange={(val) => setFormData({ ...formData, condition: (val as "new" | "used") || "new" })}
-                  >
-                    <SelectTrigger className="border-black/10 rounded-none">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="new">Neuf sous blister</SelectItem>
-                      <SelectItem value="used">Certifié Héritage (Occasion)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-1.5 flex flex-col justify-end">
-                  <label className="flex items-center gap-2 p-2 border border-black/10 cursor-pointer hover:bg-black/5">
-                    <input
-                      type="checkbox"
-                      checked={formData.is_featured}
-                      onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
-                      className="rounded"
-                    />
-                    <span className="text-xs font-medium text-luxury-charcoal">En vedette (Homepage)</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Image URL */}
-              <div className="space-y-1.5">
-                <Label className="text-xs uppercase tracking-wider text-luxury-gray">URL du visuel principal</Label>
-                <Input
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  placeholder="https://images.unsplash.com/photo-..."
-                  className="border-black/10 rounded-none"
-                />
-              </div>
-
-              {/* Description */}
-              <div className="space-y-1.5">
-                <Label className="text-xs uppercase tracking-wider text-luxury-gray">Description d&apos;excellence</Label>
-                <textarea 
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full flex min-h-[90px] border border-black/10 bg-background p-3 text-sm focus:outline-none focus:border-luxury-charcoal"
-                  placeholder="Points d'exception, garantie, état de la batterie..."
-                />
-              </div>
-
-              {/* Fiche Technique */}
-              <div className="p-4 bg-luxury-sand/50 border border-black/5 space-y-4">
-                <h3 className="font-semibold text-xs uppercase tracking-wider text-luxury-charcoal">
-                  Fiche Technique Détaillée
-                </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-luxury-gray">RAM</Label>
-                    <Input 
-                      value={formData.specs.ram}
-                      onChange={(e) => setFormData({ ...formData, specs: { ...formData.specs, ram: e.target.value } })}
-                      placeholder="ex: 8Go ou 12Go"
-                      className="bg-white border-black/10 rounded-none h-8 text-xs"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-luxury-gray">Stockage</Label>
-                    <Input 
-                      value={formData.specs.storage}
-                      onChange={(e) => setFormData({ ...formData, specs: { ...formData.specs, storage: e.target.value } })}
-                      placeholder="ex: 256Go"
-                      className="bg-white border-black/10 rounded-none h-8 text-xs"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-luxury-gray">Batterie</Label>
-                    <Input 
-                      value={formData.specs.battery}
-                      onChange={(e) => setFormData({ ...formData, specs: { ...formData.specs, battery: e.target.value } })}
-                      placeholder="ex: 5000 mAh"
-                      className="bg-white border-black/10 rounded-none h-8 text-xs"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-luxury-gray">Écran</Label>
-                    <Input 
-                      value={formData.specs.screen}
-                      onChange={(e) => setFormData({ ...formData, specs: { ...formData.specs, screen: e.target.value } })}
-                      placeholder="ex: 6.8 OLED 120Hz"
-                      className="bg-white border-black/10 rounded-none h-8 text-xs"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-luxury-gray">Processeur</Label>
-                    <Input 
-                      value={formData.specs.processor}
-                      onChange={(e) => setFormData({ ...formData, specs: { ...formData.specs, processor: e.target.value } })}
-                      placeholder="ex: A18 Pro / Snapdragon 8"
-                      className="bg-white border-black/10 rounded-none h-8 text-xs"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-luxury-gray">Appareil photo</Label>
-                    <Input 
-                      value={formData.specs.camera}
-                      onChange={(e) => setFormData({ ...formData, specs: { ...formData.specs, camera: e.target.value } })}
-                      placeholder="ex: 48MP Triple capteur"
-                      className="bg-white border-black/10 rounded-none h-8 text-xs"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <DialogFooter className="gap-2">
-              <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="rounded-none">
-                Annuler
-              </Button>
-              <Button 
-                onClick={handleSave} 
-                disabled={isSaving}
-                className="bg-luxury-charcoal text-white hover:bg-black rounded-none min-w-[120px]"
-              >
-                {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Enregistrer"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Button
+          onClick={() => { resetForm(); setIsModalOpen(true); }}
+          className="bg-[#0a0a14] text-white hover:bg-black rounded-xl shadow-sm h-10 px-4 text-xs font-semibold gap-2"
+        >
+          <Plus className="w-4 h-4" />
+          Ajouter un appareil
+        </Button>
       </div>
 
       {/* Main Table Card */}
-      <Card className="rounded-none border-black/10 shadow-sm overflow-hidden bg-white">
-        <CardHeader className="py-4 border-b border-black/5">
+      <Card className="rounded-2xl border-slate-200/80 shadow-sm overflow-hidden bg-white">
+        <CardHeader className="py-4 px-6 border-b border-slate-100">
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
             <div className="relative flex-1 w-full max-w-sm">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-luxury-gray" />
+              <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
               <Input
                 type="search"
                 placeholder="Rechercher par nom, marque..."
-                className="pl-9 bg-[#f9fafb] border-black/10 text-sm focus:bg-white transition-all rounded-none"
+                className="pl-10 bg-slate-50 border-slate-200 text-xs focus:bg-white transition-all rounded-xl h-9"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs text-luxury-gray">État :</span>
-              {["all", "new", "used"].map((cond) => (
+              <span className="text-xs text-slate-400 font-medium">État :</span>
+              {[
+                { key: "all", label: "Tous" },
+                { key: "new", label: "Neuf Scellé" },
+                { key: "used", label: "Héritage A+" },
+              ].map((cond) => (
                 <button
-                  key={cond}
-                  onClick={() => setConditionFilter(cond)}
-                  className={`px-3 py-1 text-xs rounded-none border transition-colors ${
-                    conditionFilter === cond
-                      ? "bg-luxury-charcoal text-white border-luxury-charcoal"
-                      : "bg-white text-luxury-gray border-black/10 hover:border-black/30"
+                  key={cond.key}
+                  onClick={() => setConditionFilter(cond.key)}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${
+                    conditionFilter === cond.key
+                      ? "bg-[#0a0a14] text-white border-[#0a0a14]"
+                      : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
                   }`}
                 >
-                  {cond === "all" ? "Tous" : cond === "new" ? "Neuf" : "Héritage"}
+                  {cond.label}
                 </button>
               ))}
             </div>
@@ -447,14 +236,14 @@ export default function ProductsPage() {
 
         <CardContent className="p-0">
           <Table>
-            <TableHeader className="bg-[#fafafa]">
-              <TableRow className="border-b border-black/5 hover:bg-transparent">
-                <TableHead className="text-[11px] font-semibold text-luxury-gray uppercase tracking-wider pl-6">Produit</TableHead>
-                <TableHead className="text-[11px] font-semibold text-luxury-gray uppercase tracking-wider">Marque</TableHead>
-                <TableHead className="text-[11px] font-semibold text-luxury-gray uppercase tracking-wider">Catégorie</TableHead>
-                <TableHead className="text-[11px] font-semibold text-luxury-gray uppercase tracking-wider">Prix de Vente</TableHead>
-                <TableHead className="text-[11px] font-semibold text-luxury-gray uppercase tracking-wider">État</TableHead>
-                <TableHead className="text-[11px] font-semibold text-luxury-gray uppercase tracking-wider text-right pr-6">Actions</TableHead>
+            <TableHeader className="bg-slate-50/50">
+              <TableRow className="border-b border-slate-100 hover:bg-transparent">
+                <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-6">Produit</TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Marque</TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Catégorie</TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Prix DZD</TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">État</TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right pr-6">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -462,54 +251,54 @@ export default function ProductsPage() {
                 <TableRow>
                   <TableCell colSpan={6} className="py-20 text-center">
                     <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#c5a059]" />
-                    <p className="text-xs text-luxury-gray mt-2">Chargement du catalogue...</p>
+                    <p className="text-xs text-slate-400 font-medium mt-2">Chargement du catalogue...</p>
                   </TableCell>
                 </TableRow>
               ) : filteredProducts.length > 0 ? (
                 filteredProducts.map((product) => (
-                  <TableRow key={product.id} className="hover:bg-black/[0.015] border-b border-black/5 transition-colors">
+                  <TableRow key={product.id} className="hover:bg-slate-50/50 border-b border-slate-100 transition-colors">
                     <TableCell className="pl-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-none bg-luxury-sand border border-black/5 overflow-hidden flex items-center justify-center shrink-0">
+                        <div className="w-11 h-11 rounded-lg bg-slate-50 border border-slate-200/80 overflow-hidden flex items-center justify-center shrink-0">
                           {product.images?.[0] ? (
-                            <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
+                            <Image src={product.images[0]} alt={product.name} width={36} height={36} className="object-contain" />
                           ) : (
-                            <Package className="w-5 h-5 text-luxury-gray" />
+                            <Package className="w-5 h-5 text-slate-400" />
                           )}
                         </div>
                         <div>
-                          <div className="font-medium text-luxury-charcoal text-sm flex items-center gap-2">
+                          <div className="font-semibold text-slate-900 text-sm flex items-center gap-2">
                             {product.name}
                             {product.is_featured && (
-                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-none text-[9px] font-bold bg-[#c5a059]/15 text-[#c5a059]">
+                              <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#c5a059]/15 text-[#c5a059]">
                                 <Sparkles className="w-2.5 h-2.5" /> Vedette
                               </span>
                             )}
                           </div>
-                          <span className="text-xs text-luxury-gray">
-                            {product.specs?.storage || ""} {product.specs?.ram ? `• ${product.specs.ram}` : ""}
+                          <span className="text-xs text-slate-400">
+                            {product.specs?.storage || ""} {product.specs?.ram ? `&bull; ${product.specs.ram}` : ""}
                           </span>
                         </div>
                       </div>
                     </TableCell>
 
-                    <TableCell className="text-luxury-gray text-xs">{product.brand?.name || "–"}</TableCell>
-                    <TableCell className="text-luxury-gray text-xs">{product.category?.name || "–"}</TableCell>
+                    <TableCell className="text-slate-600 text-xs font-medium">{product.brand?.name || "–"}</TableCell>
+                    <TableCell className="text-slate-600 text-xs font-medium">{product.category?.name || "–"}</TableCell>
 
-                    <TableCell className="font-mono font-semibold text-luxury-charcoal text-sm">
+                    <TableCell className="font-mono font-bold text-slate-900 text-sm">
                       {formatPrice(product.promo_price ?? product.base_price)} DZD
                       {product.promo_price && (
-                        <div className="text-[10px] text-luxury-gray line-through">
+                        <div className="text-[10px] text-slate-400 line-through">
                           {formatPrice(product.base_price)} DZD
                         </div>
                       )}
                     </TableCell>
 
                     <TableCell>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-none text-[10px] font-semibold uppercase tracking-wider ${
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
                         product.condition === 'new' 
-                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' 
-                          : 'bg-luxury-sand text-luxury-charcoal border border-black/10'
+                          ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' 
+                          : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
                       }`}>
                         {product.condition === "new" ? "Neuf" : "Héritage"}
                       </span>
@@ -520,24 +309,26 @@ export default function ProductsPage() {
                         variant="ghost" 
                         size="icon" 
                         onClick={() => handleEdit(product)}
-                        className="h-8 w-8 text-luxury-gray hover:text-luxury-charcoal rounded-none"
+                        className="h-8 w-8 text-slate-500 hover:text-slate-900 rounded-lg hover:bg-slate-100"
+                        aria-label="Modifier le produit"
                       >
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="h-3.5 w-3.5" />
                       </Button>
                       <Button 
                         variant="ghost" 
                         size="icon" 
                         onClick={() => handleDelete(product.id)}
-                        className="h-8 w-8 text-luxury-gray hover:text-red-600 rounded-none"
+                        className="h-8 w-8 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50"
+                        aria-label="Supprimer le produit"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-20 text-center text-sm text-luxury-gray">
+                  <TableCell colSpan={6} className="py-20 text-center text-sm text-slate-400">
                     Aucun appareil trouvé.
                   </TableCell>
                 </TableRow>
@@ -546,6 +337,218 @@ export default function ProductsPage() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Add / Edit Dialog */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto border-slate-200 rounded-3xl p-6 bg-white shadow-2xl">
+          <DialogHeader className="border-b border-slate-100 pb-4">
+            <DialogTitle className="text-xl font-outfit font-bold text-slate-900">
+              {editingId ? "Modifier l'Appareil" : "Ajouter un Nouvel Appareil"}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="grid gap-6 py-4">
+            {/* Informations Générales */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Nom de l&apos;Appareil</Label>
+                <Input
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="ex: Apple iPhone 16 Pro Max 256GB"
+                  className="rounded-xl border-slate-200 text-xs"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Marque</Label>
+                <Select
+                  value={formData.brand_id}
+                  onValueChange={(val) => setFormData({ ...formData, brand_id: val || "" })}
+                >
+                  <SelectTrigger className="rounded-xl border-slate-200 text-xs">
+                    <SelectValue placeholder="Sélectionner la marque" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    {brands.map((b) => (
+                      <SelectItem key={b.id} value={b.id}>
+                        {b.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Catégorie</Label>
+                <Select
+                  value={formData.category_id}
+                  onValueChange={(val) => setFormData({ ...formData, category_id: val || "" })}
+                >
+                  <SelectTrigger className="rounded-xl border-slate-200 text-xs">
+                    <SelectValue placeholder="Sélectionner la catégorie" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    {categories.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Prix Standard (DZD)</Label>
+                <Input
+                  type="number"
+                  value={formData.base_price}
+                  onChange={(e) => setFormData({ ...formData, base_price: e.target.value })}
+                  placeholder="ex: 245000"
+                  className="rounded-xl border-slate-200 text-xs font-mono"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Prix Promotionnel (Optionnel, DZD)</Label>
+                <Input
+                  type="number"
+                  value={formData.promo_price}
+                  onChange={(e) => setFormData({ ...formData, promo_price: e.target.value })}
+                  placeholder="ex: 229000"
+                  className="rounded-xl border-slate-200 text-xs font-mono"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs uppercase tracking-wider text-slate-500 font-semibold">État</Label>
+                <Select
+                  value={formData.condition}
+                  onValueChange={(val) => setFormData({ ...formData, condition: (val as "new" | "used") || "new" })}
+                >
+                  <SelectTrigger className="rounded-xl border-slate-200 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    <SelectItem value="new">Neuf Scellé</SelectItem>
+                    <SelectItem value="used">Occasion Certifiée Héritage (A+)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center gap-2 pt-6">
+                <label className="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 w-full">
+                  <input
+                    type="checkbox"
+                    checked={formData.is_featured}
+                    onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
+                    className="rounded text-[#c5a059]"
+                  />
+                  <span className="text-xs font-semibold text-slate-700">Mettre en vedette (Homepage)</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Image URL */}
+            <div className="space-y-1.5">
+              <Label className="text-xs uppercase tracking-wider text-slate-500 font-semibold">URL du visuel principal</Label>
+              <Input
+                value={formData.image_url}
+                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                placeholder="https://images.unsplash.com/... ou /products/..."
+                className="rounded-xl border-slate-200 text-xs"
+              />
+            </div>
+
+            {/* Description */}
+            <div className="space-y-1.5">
+              <Label className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Description</Label>
+              <textarea 
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="w-full flex min-h-[90px] border border-slate-200 rounded-xl bg-slate-50 p-3 text-xs focus:outline-none focus:border-[#0a0a14]"
+                placeholder="Caractéristiques d'exception, garantie, état de la batterie..."
+              />
+            </div>
+
+            {/* Fiche Technique */}
+            <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-3">
+              <h3 className="font-bold text-xs uppercase tracking-wider text-slate-700">
+                Fiche Technique Détaillée
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-slate-400 font-semibold">RAM</Label>
+                  <Input 
+                    value={formData.specs.ram}
+                    onChange={(e) => setFormData({ ...formData, specs: { ...formData.specs, ram: e.target.value } })}
+                    placeholder="ex: 8Go ou 12Go"
+                    className="bg-white border-slate-200 rounded-lg h-8 text-xs"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-slate-400 font-semibold">Stockage</Label>
+                  <Input 
+                    value={formData.specs.storage}
+                    onChange={(e) => setFormData({ ...formData, specs: { ...formData.specs, storage: e.target.value } })}
+                    placeholder="ex: 256Go"
+                    className="bg-white border-slate-200 rounded-lg h-8 text-xs"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-slate-400 font-semibold">Batterie</Label>
+                  <Input 
+                    value={formData.specs.battery}
+                    onChange={(e) => setFormData({ ...formData, specs: { ...formData.specs, battery: e.target.value } })}
+                    placeholder="ex: 5000 mAh"
+                    className="bg-white border-slate-200 rounded-lg h-8 text-xs"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-slate-400 font-semibold">Écran</Label>
+                  <Input 
+                    value={formData.specs.screen}
+                    onChange={(e) => setFormData({ ...formData, specs: { ...formData.specs, screen: e.target.value } })}
+                    placeholder="ex: 6.8 OLED 120Hz"
+                    className="bg-white border-slate-200 rounded-lg h-8 text-xs"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-slate-400 font-semibold">Processeur</Label>
+                  <Input 
+                    value={formData.specs.processor}
+                    onChange={(e) => setFormData({ ...formData, specs: { ...formData.specs, processor: e.target.value } })}
+                    placeholder="ex: A18 Pro"
+                    className="bg-white border-slate-200 rounded-lg h-8 text-xs"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-slate-400 font-semibold">Appareil photo</Label>
+                  <Input 
+                    value={formData.specs.camera}
+                    onChange={(e) => setFormData({ ...formData, specs: { ...formData.specs, camera: e.target.value } })}
+                    placeholder="ex: 48MP Triple capteur"
+                    className="bg-white border-slate-200 rounded-lg h-8 text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 border-t border-slate-100 pt-4">
+            <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="rounded-xl text-xs font-semibold">
+              Annuler
+            </Button>
+            <Button 
+              onClick={handleSave} 
+              disabled={isSaving}
+              className="bg-[#0a0a14] text-white hover:bg-black rounded-xl text-xs font-semibold min-w-[120px]"
+            >
+              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Enregistrer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -69,7 +69,7 @@ export default function PromosPage() {
         <div className="container mx-auto px-6 max-w-5xl text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-600/20 text-red-400 border border-red-500/30 text-xs uppercase tracking-widest font-semibold mb-4">
             <Flame className="w-4 h-4 text-red-500 animate-pulse" />
-            Vente Privée Flash • Quantités Limitées
+            Vente Privée Flash &bull; Quantités Limitées
           </div>
 
           <h1 className="text-4xl md:text-6xl font-outfit font-light text-white mb-4 leading-tight">
@@ -112,10 +112,10 @@ export default function PromosPage() {
 
             <div className="space-y-6">
               <div>
-                <span className="text-xs font-bold text-[#c5a059] uppercase tracking-widest block mb-1">
-                  Exclusivité Showroom
+                <span className="text-xs font-bold text-red-600 uppercase tracking-widest">
+                  {starDeal.brand?.name || "Édition Limitée"} &bull; Remise Immédiate
                 </span>
-                <h2 className="text-3xl font-outfit font-light text-luxury-charcoal">
+                <h2 className="text-3xl font-outfit font-light text-luxury-charcoal mt-1">
                   {starDeal.name}
                 </h2>
                 <p className="text-xs text-luxury-gray mt-2 leading-relaxed font-light">
@@ -123,8 +123,9 @@ export default function PromosPage() {
                 </p>
               </div>
 
-              <div className="flex items-baseline gap-4 border-y border-black/5 py-4">
-                <span className="text-3xl font-outfit font-bold text-luxury-charcoal">
+              {/* Price comparison */}
+              <div className="flex items-baseline gap-4 py-3 border-y border-black/10">
+                <span className="text-3xl font-bold font-mono text-red-600">
                   {formatPrice(starDeal.promo_price || starDeal.base_price)} DZD
                 </span>
                 <span className="text-base text-luxury-gray line-through font-mono">

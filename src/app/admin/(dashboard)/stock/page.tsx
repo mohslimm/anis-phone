@@ -7,11 +7,9 @@ import {
   AlertCircle, 
   Loader2, 
   CheckCircle2, 
-  ArrowUpDown, 
   Plus, 
   Layers, 
   AlertTriangle,
-  PackageCheck,
   PackageX
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -133,12 +131,12 @@ export default function StockPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-luxury-charcoal font-outfit">
-            Gestion des Stocks & Inventaire
+          <h1 className="text-2xl font-bold tracking-tight text-luxury-charcoal font-outfit uppercase">
+            Gestion des Stocks &amp; Inventaire
           </h1>
-          <p className="text-[13px] text-luxury-gray">
+          <p className="text-xs text-luxury-gray mt-1">
             Surveillez et ajustez vos niveaux d&apos;inventaire en temps réel.
           </p>
         </div>
@@ -146,7 +144,7 @@ export default function StockPage() {
         <Button
           onClick={fetchInventory}
           variant="outline"
-          className="border-black/10 text-luxury-charcoal hover:bg-black/5"
+          className="rounded-xl border-slate-200 text-xs font-semibold hover:bg-slate-50 gap-2 h-10"
         >
           Actualiser l&apos;inventaire
         </Button>
@@ -154,47 +152,47 @@ export default function StockPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white border border-black/10 p-5 rounded-none flex items-center justify-between">
+        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl flex items-center justify-between shadow-sm">
           <div>
-            <span className="text-xs uppercase tracking-wider text-luxury-gray font-semibold">Articles Total</span>
-            <div className="text-2xl font-bold text-luxury-charcoal mt-1">{totalVariants}</div>
+            <span className="text-[11px] uppercase tracking-wider text-slate-400 font-bold">Articles Total</span>
+            <div className="text-2xl font-bold text-slate-900 mt-1">{totalVariants}</div>
           </div>
-          <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center text-luxury-charcoal">
+          <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600">
             <Layers className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-white border border-black/10 p-5 rounded-none flex items-center justify-between">
+        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl flex items-center justify-between shadow-sm">
           <div>
-            <span className="text-xs uppercase tracking-wider text-amber-700 font-semibold">Stock Faible (&lt; 5)</span>
+            <span className="text-[11px] uppercase tracking-wider text-amber-600 font-bold">Stock Faible (&lt; 5)</span>
             <div className="text-2xl font-bold text-amber-600 mt-1">{lowStockCount}</div>
           </div>
-          <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
+          <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
             <AlertTriangle className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-white border border-black/10 p-5 rounded-none flex items-center justify-between">
+        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl flex items-center justify-between shadow-sm">
           <div>
-            <span className="text-xs uppercase tracking-wider text-red-700 font-semibold">Rupture Immédiate</span>
+            <span className="text-[11px] uppercase tracking-wider text-red-600 font-bold">Rupture Immédiate</span>
             <div className="text-2xl font-bold text-red-600 mt-1">{outOfStockCount}</div>
           </div>
-          <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-600">
+          <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-600">
             <PackageX className="w-5 h-5" />
           </div>
         </div>
       </div>
 
       {/* Main Table Card */}
-      <Card className="rounded-none border-black/10 shadow-sm bg-white overflow-hidden">
-        <CardHeader className="py-4 border-b border-black/5">
+      <Card className="rounded-2xl border-slate-200/80 shadow-sm bg-white overflow-hidden">
+        <CardHeader className="py-4 px-6 border-b border-slate-100">
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
             <div className="relative flex-1 w-full max-w-md">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-luxury-gray" />
+              <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
               <Input
                 type="search"
                 placeholder="Rechercher par produit, capacité, couleur..."
-                className="pl-9 bg-[#f9fafb] border-black/10 text-sm focus:bg-white transition-all rounded-none"
+                className="pl-10 bg-slate-50 border-slate-200 text-xs focus:bg-white transition-all rounded-xl h-9"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -211,10 +209,10 @@ export default function StockPage() {
                 <button
                   key={btn.key}
                   onClick={() => setStatusFilter(btn.key)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-none border transition-colors whitespace-nowrap ${
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors whitespace-nowrap ${
                     statusFilter === btn.key
-                      ? "bg-luxury-charcoal text-white border-luxury-charcoal"
-                      : "bg-white text-luxury-gray border-black/10 hover:border-black/30"
+                      ? "bg-[#0a0a14] text-white border-[#0a0a14]"
+                      : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
                   }`}
                 >
                   {btn.label}
@@ -226,14 +224,14 @@ export default function StockPage() {
 
         <CardContent className="p-0">
           <Table>
-            <TableHeader className="bg-[#fafafa]">
-              <TableRow className="border-b border-black/5 hover:bg-transparent">
-                <TableHead className="text-[11px] font-semibold text-luxury-gray uppercase tracking-wider pl-6">Produit</TableHead>
-                <TableHead className="text-[11px] font-semibold text-luxury-gray uppercase tracking-wider">Configuration</TableHead>
-                <TableHead className="text-[11px] font-semibold text-luxury-gray uppercase tracking-wider">Prix indicatif</TableHead>
-                <TableHead className="text-[11px] font-semibold text-luxury-gray uppercase tracking-wider">Statut</TableHead>
-                <TableHead className="text-[11px] font-semibold text-luxury-gray uppercase tracking-wider w-[140px]">Quantité</TableHead>
-                <TableHead className="text-[11px] font-semibold text-luxury-gray uppercase tracking-wider text-right pr-6">Actions</TableHead>
+            <TableHeader className="bg-slate-50/50">
+              <TableRow className="border-b border-slate-100 hover:bg-transparent">
+                <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-6">Produit</TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Configuration</TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Prix indicatif</TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Statut</TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider w-[140px]">Quantité</TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right pr-6">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -241,7 +239,7 @@ export default function StockPage() {
                 <TableRow>
                   <TableCell colSpan={6} className="h-48 text-center">
                     <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#c5a059] mb-2" />
-                    <p className="text-xs text-luxury-gray">Chargement de l&apos;inventaire...</p>
+                    <p className="text-xs text-slate-400 font-medium">Chargement de l&apos;inventaire...</p>
                   </TableCell>
                 </TableRow>
               ) : filteredItems.length > 0 ? (
@@ -252,38 +250,38 @@ export default function StockPage() {
                   return (
                     <TableRow 
                       key={item.id} 
-                      className={`border-b border-black/5 hover:bg-black/[0.015] transition-colors ${
-                        isOut ? "bg-red-50/30" : isLow ? "bg-amber-50/20" : ""
+                      className={`border-b border-slate-100 hover:bg-slate-50/50 transition-colors ${
+                        isOut ? "bg-red-50/20" : isLow ? "bg-amber-50/20" : ""
                       }`}
                     >
                       <TableCell className="pl-6 py-4">
                         <div className="flex items-center gap-2">
                           {isOut && <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />}
-                          <span className="font-medium text-sm text-luxury-charcoal">
+                          <span className="font-semibold text-sm text-slate-900">
                             {item.product_name}
                           </span>
                         </div>
                       </TableCell>
 
-                      <TableCell className="text-sm text-luxury-gray">
+                      <TableCell className="text-xs text-slate-500 font-medium">
                         {item.label}
                       </TableCell>
 
-                      <TableCell className="text-sm font-mono font-medium text-luxury-charcoal">
+                      <TableCell className="text-sm font-mono font-bold text-slate-900">
                         {formatPrice(item.base_price)} DZD
                       </TableCell>
 
                       <TableCell>
                         {isOut ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-none text-[11px] font-medium bg-red-100 text-red-800">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-500/10 text-red-600 border border-red-500/20">
                             Rupture
                           </span>
                         ) : isLow ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-none text-[11px] font-medium bg-amber-100 text-amber-800">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-600 border border-amber-500/20">
                             Faible ({item.stock_qty})
                           </span>
                         ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-none text-[11px] font-medium bg-emerald-100 text-emerald-800">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
                             En stock ({item.stock_qty})
                           </span>
                         )}
@@ -296,8 +294,8 @@ export default function StockPage() {
                             min="0"
                             value={item.stock_qty}
                             onChange={(e) => onQuantityChange(item.id, e.target.value)}
-                            className={`h-8 w-20 text-center font-mono font-semibold rounded-none ${
-                              isOut ? "border-red-400 text-red-600 bg-red-50/50" : "border-black/15"
+                            className={`h-8 w-20 text-center font-mono font-bold rounded-lg text-xs ${
+                              isOut ? "border-red-300 text-red-600 bg-red-50/50" : "border-slate-200"
                             }`}
                           />
                         </div>
@@ -313,7 +311,7 @@ export default function StockPage() {
                               setRestockModalItem(item);
                               setAddedQty(10);
                             }}
-                            className="h-8 px-2 text-xs text-luxury-gray hover:text-luxury-charcoal"
+                            className="h-8 px-2.5 text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg"
                           >
                             <Plus className="w-3.5 h-3.5 mr-1" /> +Ajouter
                           </Button>
@@ -324,10 +322,10 @@ export default function StockPage() {
                             size="sm"
                             disabled={isSaving === item.id}
                             onClick={() => handleSaveStock(item.id, item.stock_qty)}
-                            className={`h-8 px-3 rounded-none text-xs font-medium min-w-[75px] transition-all ${
+                            className={`h-8 px-3 rounded-lg text-xs font-semibold min-w-[75px] transition-all ${
                               saveSuccess === item.id
                                 ? "bg-emerald-600 text-white border-emerald-600"
-                                : "border-black/15 text-luxury-charcoal hover:bg-luxury-charcoal hover:text-white"
+                                : "border-slate-200 text-slate-700 hover:bg-[#0a0a14] hover:text-white"
                             }`}
                           >
                             {isSaving === item.id ? (
@@ -349,7 +347,7 @@ export default function StockPage() {
                 })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-32 text-center text-sm text-luxury-gray">
+                  <TableCell colSpan={6} className="h-32 text-center text-sm text-slate-400">
                     Aucun article correspondant trouvé.
                   </TableCell>
                 </TableRow>
@@ -362,30 +360,30 @@ export default function StockPage() {
       {/* Modal Réapprovisionnement Rapide */}
       {restockModalItem && (
         <Dialog open={!!restockModalItem} onOpenChange={() => setRestockModalItem(null)}>
-          <DialogContent className="rounded-none max-w-md border-black/10">
-            <DialogHeader>
-              <DialogTitle className="text-lg font-outfit">Réapprovisionner le Stock</DialogTitle>
+          <DialogContent className="rounded-3xl max-w-md border-slate-200 p-6 bg-white shadow-2xl">
+            <DialogHeader className="border-b border-slate-100 pb-3">
+              <DialogTitle className="text-lg font-outfit font-bold text-slate-900">Réapprovisionner le Stock</DialogTitle>
             </DialogHeader>
 
             <div className="py-4 space-y-4">
-              <div>
-                <p className="text-sm font-semibold text-luxury-charcoal">{restockModalItem.product_name}</p>
-                <p className="text-xs text-luxury-gray">{restockModalItem.label}</p>
-                <p className="text-xs text-luxury-charcoal mt-1">Stock actuel : <strong>{restockModalItem.stock_qty} unités</strong></p>
+              <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl">
+                <p className="text-sm font-bold text-slate-900">{restockModalItem.product_name}</p>
+                <p className="text-xs text-slate-500 mt-0.5">{restockModalItem.label}</p>
+                <p className="text-xs text-slate-700 mt-2">Stock actuel : <strong>{restockModalItem.stock_qty} unités</strong></p>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-wider text-luxury-gray">Unités à ajouter</Label>
+                <Label className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Unités à ajouter</Label>
                 <div className="grid grid-cols-4 gap-2 mb-2">
                   {[5, 10, 20, 50].map((preset) => (
                     <button
                       key={preset}
                       type="button"
                       onClick={() => setAddedQty(preset)}
-                      className={`py-2 text-xs font-semibold border rounded-none transition-colors ${
+                      className={`py-2 text-xs font-bold border rounded-xl transition-colors ${
                         addedQty === preset
-                          ? "bg-luxury-charcoal text-white border-luxury-charcoal"
-                          : "bg-white text-luxury-gray border-black/10 hover:border-black/30"
+                          ? "bg-[#0a0a14] text-white border-[#0a0a14]"
+                          : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
                       }`}
                     >
                       +{preset}
@@ -397,20 +395,20 @@ export default function StockPage() {
                   min="1"
                   value={addedQty}
                   onChange={(e) => setAddedQty(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="rounded-none border-black/15 font-mono text-base"
+                  className="rounded-xl border-slate-200 font-mono text-base h-10"
                 />
               </div>
 
-              <div className="p-3 bg-luxury-sand text-xs text-luxury-charcoal border border-black/5">
-                Nouveau stock après validation : <strong>{restockModalItem.stock_qty + addedQty} unités</strong>
+              <div className="p-3 bg-[#c5a059]/10 rounded-xl text-xs text-slate-800 border border-[#c5a059]/20">
+                Nouveau stock calculé : <strong>{restockModalItem.stock_qty + addedQty} unités</strong>
               </div>
             </div>
 
-            <DialogFooter>
-              <Button variant="ghost" onClick={() => setRestockModalItem(null)} className="rounded-none">
+            <DialogFooter className="gap-2 border-t border-slate-100 pt-3">
+              <Button variant="ghost" onClick={() => setRestockModalItem(null)} className="rounded-xl text-xs font-semibold">
                 Annuler
               </Button>
-              <Button onClick={handleQuickRestock} className="bg-luxury-charcoal text-white hover:bg-black rounded-none">
+              <Button onClick={handleQuickRestock} className="bg-[#0a0a14] text-white hover:bg-black rounded-xl text-xs font-semibold">
                 Confirmer l&apos;approvisionnement
               </Button>
             </DialogFooter>

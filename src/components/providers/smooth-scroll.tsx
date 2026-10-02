@@ -1,22 +1,30 @@
 "use client";
 
-import { ReactNode, useState, useEffect } from "react";
-import { ReactLenis } from "lenis/react";
+import { ReactNode, useEffect } from "react";
+import Lenis from "lenis";
 
 export function SmoothScrollProvider({ children }: { children: ReactNode }) {
-  const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
-    setMounted(true);
+    // Only instantiate on client
+    const lenis = new Lenis({
+      lerp: 0.08,
+      duration: 1.2,
+      smoothWheel: true,
+    });
+
+    let rafId: number;
+    function raf(time: number) {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    }
+
+    rafId = requestAnimationFrame(raf);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+    };
   }, []);
 
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
-  return (
-    <ReactLenis root options={{ lerp: 0.05, duration: 1.5, smoothWheel: true }}>
-      {children}
-    </ReactLenis>
-  );
+  return <>{children}</>;
 }

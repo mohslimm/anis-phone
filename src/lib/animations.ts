@@ -31,7 +31,6 @@ export const shouldReduceMotion = () => {
 export const revealFromBottom = (element: Element | string, delay: number = 0) => {
   if (typeof window === "undefined") return;
 
-  // Check if target exists to avoid GSAP warnings
   const target = typeof element === "string" ? document.querySelector(element) : element;
   if (!target) return;
 
@@ -41,7 +40,7 @@ export const revealFromBottom = (element: Element | string, delay: number = 0) =
   }
   
   gsap.fromTo(
-    element,
+    target,
     { opacity: 0, y: 30 },
     {
       opacity: 1,
@@ -50,7 +49,7 @@ export const revealFromBottom = (element: Element | string, delay: number = 0) =
       ease: ANIMATION_CONFIG.easings.entrance,
       delay: delay,
       scrollTrigger: {
-        trigger: element,
+        trigger: target as any,
         start: "top 85%", // Démarre quand le top est à 85% de la fenêtre
         toggleActions: "play none none reverse", // Se joue à l'entrée, s'inverse si on remonte haut
       },
@@ -61,7 +60,6 @@ export const revealFromBottom = (element: Element | string, delay: number = 0) =
 export const staggerReveal = (elements: Element[] | string, staggerAmount: number = 0.1) => {
   if (typeof window === "undefined") return;
 
-  // Check if targets exist to avoid GSAP warnings
   const targets = typeof elements === "string" ? document.querySelectorAll(elements) : elements;
   if (!targets || (targets instanceof NodeList && targets.length === 0) || (Array.isArray(targets) && targets.length === 0)) {
     return;
@@ -71,9 +69,11 @@ export const staggerReveal = (elements: Element[] | string, staggerAmount: numbe
     gsap.set(elements, { opacity: 1, y: 0 });
     return;
   }
-  
+
+  const triggerEl = typeof elements === "string" ? (targets as NodeList)[0] as Element : (elements as Element[])[0];
+
   gsap.fromTo(
-    elements,
+    targets,
     { opacity: 0, y: 30 },
     {
       opacity: 1,
@@ -82,7 +82,7 @@ export const staggerReveal = (elements: Element[] | string, staggerAmount: numbe
       ease: ANIMATION_CONFIG.easings.entrance,
       stagger: staggerAmount,
       scrollTrigger: {
-        trigger: typeof elements === "string" ? (targets as NodeList)[0] as Element : (elements as Element[])[0],
+        trigger: triggerEl,
         start: "top 85%",
       },
     }

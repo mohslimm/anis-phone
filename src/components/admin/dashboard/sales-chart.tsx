@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 
 // Mock data (since we don't have enough history in DB yet)
@@ -17,53 +16,52 @@ const data = [
 
 export function SalesChart() {
   return (
-    <Card className="col-span-1 lg:col-span-3">
-      <CardHeader>
-        <CardTitle>Aperçu des Ventes (30 derniers jours)</CardTitle>
-        <CardDescription>
-          Évolution du chiffre d'affaires en DZD.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="pl-0">
-        <div className="h-[300px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 10, right: 30, left: 20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorVentes" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-slate-200" />
-              <XAxis 
-                dataKey="date" 
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(value) => value}
-                className="text-xs font-medium text-slate-500"
-              />
-              <YAxis 
-                tickFormatter={(value) => `${(value / 1000)}k`} 
-                tickLine={false}
-                axisLine={false}
-                className="text-xs font-medium text-slate-500"
-              />
-              <Tooltip 
-                formatter={(value: any) => [`${Number(value).toLocaleString()} DZD`, "Chiffre d'affaires"]}
-                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="ventes" 
-                stroke="#2563eb" 
-                strokeWidth={3}
-                fillOpacity={1} 
-                fill="url(#colorVentes)" 
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="h-full w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+          <defs>
+            <linearGradient id="colorVentes" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#f7bf33" stopOpacity={0.3}/>
+              <stop offset="95%" stopColor="#f7bf33" stopOpacity={0}/>
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+          <XAxis 
+            dataKey="date" 
+            tickLine={false}
+            axisLine={false}
+            tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+            dy={10}
+          />
+          <YAxis 
+            tickFormatter={(value) => `${(value / 1000)}k`} 
+            tickLine={false}
+            axisLine={false}
+            tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+          />
+          <Tooltip 
+            cursor={{ stroke: '#f7bf33', strokeWidth: 2, strokeDasharray: '4 4' }}
+            contentStyle={{ 
+                borderRadius: '16px', 
+                border: 'none', 
+                boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                padding: '12px'
+            }}
+            labelStyle={{ fontWeight: 800, color: '#1a1a1a', marginBottom: '4px', fontSize: '12px' }}
+            itemStyle={{ fontSize: '11px', fontWeight: 600, color: '#f7bf33' }}
+            formatter={(value: any) => [`${Number(value).toLocaleString()} DZD`, "CA"]}
+          />
+          <Area 
+            type="monotone" 
+            dataKey="ventes" 
+            stroke="#f7bf33" 
+            strokeWidth={4}
+            fillOpacity={1} 
+            fill="url(#colorVentes)" 
+            animationDuration={2000}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
   );
 }

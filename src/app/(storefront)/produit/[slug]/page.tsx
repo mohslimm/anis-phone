@@ -23,6 +23,5 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
-  // Pass the promise directly to the client component to be unwrapped with React.use()
   return <ProductClient params={params} />;
 }

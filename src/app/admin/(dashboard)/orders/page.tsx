@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import Image from "next/image";
 import { 
   Search, 
   Download, 
@@ -14,8 +15,9 @@ import {
   Phone, 
   Printer, 
   MapPin, 
-  MessageSquare,
-  FileSpreadsheet
+  User,
+  ShoppingBag,
+  Calendar
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,9 +45,50 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { DataService, Order, OrderStatus } from "@/lib/data-service";
 import { formatPrice } from "@/lib/format";
+
+function StatusBadge({ status }: { status: OrderStatus }) {
+  switch (status) {
+    case "pending":
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 border border-amber-500/20">
+          <Clock className="w-3.5 h-3.5 text-amber-500" />
+          En attente
+        </span>
+      );
+    case "confirmed":
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-600 border border-blue-500/20">
+          <CheckCircle className="w-3.5 h-3.5 text-blue-500" />
+          Confirmée
+        </span>
+      );
+    case "shipped":
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-600 border border-indigo-500/20">
+          <Truck className="w-3.5 h-3.5 text-indigo-500" />
+          Expédiée
+        </span>
+      );
+    case "delivered":
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+          <Package className="w-3.5 h-3.5 text-emerald-500" />
+          Livrée &bull; Encaissée
+        </span>
+      );
+    case "cancelled":
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-600 border border-red-500/20">
+          <XCircle className="w-3.5 h-3.5 text-red-500" />
+          Annulée
+        </span>
+      );
+    default:
+      return <span>{status}</span>;
+  }
+}
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -118,77 +161,37 @@ export default function OrdersPage() {
     });
   }, [orders, statusFilter, searchTerm]);
 
-  const StatusBadge = ({ status }: { status: OrderStatus }) => {
-    switch (status) {
-      case "pending":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-none text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">
-            <Clock className="w-3.5 h-3.5 text-amber-600" />
-            En attente
-          </span>
-        );
-      case "confirmed":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-none text-xs font-medium bg-blue-50 text-blue-800 border border-blue-200">
-            <CheckCircle className="w-3.5 h-3.5 text-blue-600" />
-            Confirmée
-          </span>
-        );
-      case "shipped":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-none text-xs font-medium bg-indigo-50 text-indigo-800 border border-indigo-200">
-            <Truck className="w-3.5 h-3.5 text-indigo-600" />
-            Expédiée
-          </span>
-        );
-      case "delivered":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-none text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
-            <Package className="w-3.5 h-3.5 text-emerald-600" />
-            Livrée & Encaissée
-          </span>
-        );
-      case "cancelled":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-none text-xs font-medium bg-red-50 text-red-800 border border-red-200">
-            <XCircle className="w-3.5 h-3.5 text-red-600" />
-            Annulée
-          </span>
-        );
-      default:
-        return <span>{status}</span>;
-    }
-  };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-luxury-charcoal font-outfit">
-            Gestion des Commandes
+          <h1 className="text-2xl font-outfit font-bold text-luxury-charcoal uppercase tracking-tight">
+            Journal des Commandes
           </h1>
-          <p className="text-[13px] text-luxury-gray">
-            Suivi des expéditions 58 Wilayas et encaissements à la livraison.
+          <p className="text-xs text-luxury-gray mt-1 flex items-center gap-2">
+            <ShoppingBag size={14} className="text-[#c5a059]" />
+            {orders.length} commandes enregistrées &bull; Expéditions 58 Wilayas
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Button
-            variant="outline"
             onClick={exportCSV}
-            className="border-black/10 text-luxury-charcoal hover:bg-black/5 rounded-none"
+            variant="outline"
+            className="rounded-xl border-slate-200 text-xs font-semibold hover:bg-slate-50 gap-2 h-10"
           >
-            <FileSpreadsheet className="w-4 h-4 mr-2" />
+            <Download className="w-4 h-4 text-luxury-gray" />
             Exporter CSV
           </Button>
         </div>
       </div>
 
-      {/* Quick Summary Filters */}
+      {/* Filter Tabs */}
       <div className="flex flex-wrap gap-2">
         {[
-          { key: "all", label: "Toutes les commandes", count: orders.length },
+          { key: "all", label: "Toutes", count: orders.length },
           { key: "pending", label: "En attente", count: orders.filter(o => o.status === "pending").length },
           { key: "confirmed", label: "Confirmées", count: orders.filter(o => o.status === "confirmed").length },
           { key: "shipped", label: "Expédiées", count: orders.filter(o => o.status === "shipped").length },
@@ -198,10 +201,10 @@ export default function OrdersPage() {
           <button
             key={tab.key}
             onClick={() => setStatusFilter(tab.key)}
-            className={`px-3 py-1.5 text-xs font-medium rounded-none border transition-all ${
+            className={`px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all ${
               statusFilter === tab.key
-                ? "bg-luxury-charcoal text-white border-luxury-charcoal shadow-sm"
-                : "bg-white text-luxury-gray border-black/10 hover:border-black/30"
+                ? "bg-[#0a0a14] text-white border-[#0a0a14] shadow-sm"
+                : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
             }`}
           >
             {tab.label} <span className="opacity-60 ml-1">({tab.count})</span>
@@ -210,14 +213,14 @@ export default function OrdersPage() {
       </div>
 
       {/* Main Table Card */}
-      <Card className="rounded-none border-black/10 shadow-sm bg-white overflow-hidden">
-        <CardHeader className="py-4 border-b border-black/5">
+      <Card className="rounded-2xl border-slate-200/80 shadow-sm bg-white overflow-hidden">
+        <CardHeader className="py-4 px-6 border-b border-slate-100">
           <div className="relative w-full max-w-md">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-luxury-gray" />
+            <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
             <Input
               type="search"
               placeholder="Rechercher par numéro, nom, téléphone, wilaya..."
-              className="pl-9 bg-[#f9fafb] border-black/10 text-sm focus:bg-white transition-all rounded-none"
+              className="pl-10 bg-slate-50 border-slate-200 text-xs focus:bg-white transition-all rounded-xl h-9"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -226,15 +229,15 @@ export default function OrdersPage() {
 
         <CardContent className="p-0">
           <Table>
-            <TableHeader className="bg-[#fafafa]">
-              <TableRow className="border-b border-black/5 hover:bg-transparent">
-                <TableHead className="text-[11px] font-semibold text-luxury-gray uppercase tracking-wider pl-6">N° Commande</TableHead>
-                <TableHead className="text-[11px] font-semibold text-luxury-gray uppercase tracking-wider">Date & Heure</TableHead>
-                <TableHead className="text-[11px] font-semibold text-luxury-gray uppercase tracking-wider">Client & Contact</TableHead>
-                <TableHead className="text-[11px] font-semibold text-luxury-gray uppercase tracking-wider">Destination</TableHead>
-                <TableHead className="text-[11px] font-semibold text-luxury-gray uppercase tracking-wider">Montant Net</TableHead>
-                <TableHead className="text-[11px] font-semibold text-luxury-gray uppercase tracking-wider">Statut</TableHead>
-                <TableHead className="text-[11px] font-semibold text-luxury-gray uppercase tracking-wider text-right pr-6">Action</TableHead>
+            <TableHeader className="bg-slate-50/50">
+              <TableRow className="border-b border-slate-100 hover:bg-transparent">
+                <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-6">N° Commande</TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Date &amp; Heure</TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Client &amp; Contact</TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Destination</TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Net</TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Statut</TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right pr-6">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -242,17 +245,17 @@ export default function OrdersPage() {
                 <TableRow>
                   <TableCell colSpan={7} className="h-48 text-center">
                     <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#c5a059] mb-2" />
-                    <p className="text-xs text-luxury-gray">Chargement du journal des commandes...</p>
+                    <p className="text-xs text-slate-400 font-medium">Chargement des commandes en cours...</p>
                   </TableCell>
                 </TableRow>
               ) : filteredOrders.length > 0 ? (
                 filteredOrders.map(order => (
-                  <TableRow key={order.id} className="border-b border-black/5 hover:bg-black/[0.015] transition-colors">
-                    <TableCell className="pl-6 py-4 font-mono font-semibold text-sm text-luxury-charcoal">
-                      #{order.id}
+                  <TableRow key={order.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                    <TableCell className="pl-6 py-4 font-mono font-bold text-sm text-slate-900">
+                      #{order.id.slice(0, 8)}
                     </TableCell>
 
-                    <TableCell className="text-xs text-luxury-gray">
+                    <TableCell className="text-xs text-slate-500 font-medium">
                       {new Date(order.created_at).toLocaleDateString("fr-FR", {
                         day: "2-digit",
                         month: "short",
@@ -263,16 +266,16 @@ export default function OrdersPage() {
                     </TableCell>
 
                     <TableCell>
-                      <div className="font-medium text-sm text-luxury-charcoal">{order.customer_name}</div>
-                      <div className="text-xs text-luxury-gray font-mono">{order.phone}</div>
+                      <div className="font-semibold text-sm text-slate-900">{order.customer_name}</div>
+                      <div className="text-xs text-slate-400 font-mono">{order.phone}</div>
                     </TableCell>
 
                     <TableCell>
-                      <div className="text-sm font-medium text-luxury-charcoal">{order.wilaya}</div>
-                      {order.commune && <div className="text-xs text-luxury-gray">{order.commune}</div>}
+                      <div className="text-sm font-semibold text-slate-800">{order.wilaya}</div>
+                      {order.commune && <div className="text-xs text-slate-400">{order.commune}</div>}
                     </TableCell>
 
-                    <TableCell className="font-mono font-bold text-sm text-luxury-charcoal">
+                    <TableCell className="font-mono font-bold text-sm text-slate-900">
                       {formatPrice(order.total_dzd)} DZD
                     </TableCell>
 
@@ -285,7 +288,7 @@ export default function OrdersPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => setSelectedOrder(order)}
-                        className="h-8 px-3 rounded-none text-xs font-medium text-luxury-charcoal bg-black/5 hover:bg-black/10"
+                        className="h-8 px-3 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200"
                       >
                         <Eye className="w-3.5 h-3.5 mr-1.5" />
                         Gérer
@@ -295,7 +298,7 @@ export default function OrdersPage() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-32 text-center text-sm text-luxury-gray">
+                  <TableCell colSpan={7} className="h-32 text-center text-sm text-slate-400">
                     Aucune commande trouvée.
                   </TableCell>
                 </TableRow>
@@ -305,167 +308,171 @@ export default function OrdersPage() {
         </CardContent>
       </Card>
 
-      {/* Modal Détails & Traitement Commande */}
-      {selectedOrder && (
-        <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
-          <DialogContent className="max-w-3xl max-h-[92vh] overflow-y-auto rounded-none border-black/10 p-6">
-            <DialogHeader className="border-b border-black/5 pb-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      {/* Order Management Dialog */}
+      <Dialog open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
+        {selectedOrder && (
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl p-6 bg-white border-slate-200 shadow-2xl">
+            <DialogHeader className="border-b border-slate-100 pb-4">
+              <div className="flex items-center justify-between">
                 <div>
-                  <DialogTitle className="text-xl font-outfit font-bold text-luxury-charcoal">
-                    Commande #{selectedOrder.id}
+                  <DialogTitle className="text-xl font-outfit font-bold text-slate-900 flex items-center gap-3">
+                    <span>Commande #{selectedOrder.id}</span>
+                    <StatusBadge status={selectedOrder.status} />
                   </DialogTitle>
-                  <DialogDescription className="text-xs text-luxury-gray mt-0.5">
-                    Enregistrée le {new Date(selectedOrder.created_at).toLocaleString("fr-FR")}
+                  <DialogDescription className="text-xs text-slate-400 mt-1 flex items-center gap-2">
+                    <Calendar size={12} />
+                    Passée le {new Date(selectedOrder.created_at).toLocaleString("fr-FR")}
                   </DialogDescription>
                 </div>
-                <StatusBadge status={selectedOrder.status} />
               </div>
             </DialogHeader>
 
-            <div className="space-y-6 py-4">
-              {/* Coordonnées Client & Expédition */}
+            <div className="py-4 space-y-6">
+              {/* Quick Actions / Customer Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 bg-luxury-sand/50 border border-black/5">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-luxury-gray">Destinataire</span>
-                  <p className="text-base font-semibold text-luxury-charcoal mt-1">{selectedOrder.customer_name}</p>
-                  <div className="flex items-center gap-2 mt-2">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+                    <User size={14} className="text-[#c5a059]" />
+                    Informations Client
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm text-slate-900">{selectedOrder.customer_name}</p>
+                    <p className="text-xs text-slate-500 font-mono mt-0.5">{selectedOrder.phone}</p>
+                  </div>
+                  <div className="flex gap-2 pt-2">
                     <a
-                      href={`tel:${selectedOrder.phone.replace(/\s+/g, '')}`}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-black/10 text-xs font-medium text-luxury-charcoal hover:bg-black hover:text-white transition-colors"
+                      href={`tel:${selectedOrder.phone}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 text-white text-xs font-semibold hover:bg-emerald-600 transition-colors"
                     >
-                      <Phone className="w-3.5 h-3.5" />
-                      {selectedOrder.phone}
+                      <Phone size={12} />
+                      Appeler
                     </a>
                     <a
-                      href={`https://wa.me/213${selectedOrder.phone.replace(/^0/, '').replace(/\s+/g, '')}`}
+                      href={`https://wa.me/213${selectedOrder.phone.replace(/\D/g, "").replace(/^0/, "")}`}
                       target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs hover:bg-emerald-100"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/10 text-emerald-700 text-xs font-semibold hover:bg-emerald-600/20 transition-colors"
                     >
-                      <MessageSquare className="w-3.5 h-3.5" /> WhatsApp
+                      WhatsApp
                     </a>
                   </div>
                 </div>
 
-                <div className="p-4 bg-luxury-sand/50 border border-black/5">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-luxury-gray">Adresse de livraison</span>
-                  <div className="flex items-start gap-2 mt-1">
-                    <MapPin className="w-4 h-4 text-luxury-gray shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-semibold text-luxury-charcoal">{selectedOrder.wilaya} {selectedOrder.commune ? `- ${selectedOrder.commune}` : ""}</p>
-                      <p className="text-xs text-luxury-gray mt-0.5">{selectedOrder.address}</p>
-                    </div>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+                    <MapPin size={14} className="text-[#c5a059]" />
+                    Adresse de Livraison (Algérie)
                   </div>
-                  {selectedOrder.notes && (
-                    <div className="mt-2 text-xs italic text-luxury-gray border-t border-black/5 pt-1.5">
-                      Note : &laquo; {selectedOrder.notes} &raquo;
+                  <div>
+                    <p className="font-semibold text-sm text-slate-900">
+                      Wilaya : {selectedOrder.wilaya} {selectedOrder.commune ? `(${selectedOrder.commune})` : ""}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      {selectedOrder.address || "Adresse complète précisée par le client"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Status Update Banner */}
+              <div className="p-4 rounded-2xl bg-[#0a0a14] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-[#c5a059]">
+                    Statut Logistique
+                  </h4>
+                  <p className="text-xs text-white/60 mt-0.5">
+                    Modifiez le statut pour synchroniser le client et le livreur
+                  </p>
+                </div>
+
+                <div className="w-full sm:w-56">
+                  <Select
+                    value={selectedOrder.status}
+                    disabled={isUpdatingStatus}
+                    onValueChange={(val) => val && handleStatusChange(selectedOrder.id, val as OrderStatus)}
+                  >
+                    <SelectTrigger className="h-10 rounded-xl bg-white/10 border-white/20 text-white font-semibold text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl">
+                      <SelectItem value="pending">En attente</SelectItem>
+                      <SelectItem value="confirmed">Confirmée</SelectItem>
+                      <SelectItem value="shipped">Expédiée (En transit)</SelectItem>
+                      <SelectItem value="delivered">Livrée &bull; Encaissée</SelectItem>
+                      <SelectItem value="cancelled">Annulée</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Items Table */}
+              <div className="border border-slate-100 rounded-2xl overflow-hidden">
+                <div className="p-3 bg-slate-50 border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Articles Commandés
+                </div>
+                <div className="divide-y divide-slate-100">
+                  {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                    selectedOrder.items.map((it: any, idx: number) => (
+                      <div key={idx} className="p-4 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center overflow-hidden shrink-0">
+                            {it.image ? (
+                              <Image src={it.image} alt={it.name || "Produit"} width={40} height={40} className="object-contain" />
+                            ) : (
+                              <ShoppingBag size={18} className="text-slate-400" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-sm text-slate-900">{it.name}</p>
+                            {it.variantLabel && (
+                              <p className="text-xs text-slate-400">Variante : {it.variantLabel}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <p className="font-mono font-bold text-sm text-slate-900">
+                            {formatPrice(it.price * (it.qty || 1))} DZD
+                          </p>
+                          <p className="text-xs text-slate-400">
+                            {formatPrice(it.price)} &times; {it.qty || 1}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-4 text-xs text-slate-400 text-center">
+                      Détails de composition standard
                     </div>
                   )}
                 </div>
-              </div>
 
-              {/* Changement de statut */}
-              <div className="p-4 border border-black/10 bg-white space-y-3">
-                <Label className="text-xs font-semibold text-luxury-charcoal uppercase tracking-wider">
-                  Mettre à jour l&apos;état de traitement
-                </Label>
-                <div className="flex flex-wrap items-center gap-2">
-                  {[
-                    { key: "pending", label: "1. En attente", color: "hover:border-amber-400" },
-                    { key: "confirmed", label: "2. Confirmée par tél.", color: "hover:border-blue-400" },
-                    { key: "shipped", label: "3. Expédiée (Colis confié)", color: "hover:border-indigo-400" },
-                    { key: "delivered", label: "4. Livrée & Encaissée", color: "hover:border-emerald-400" },
-                    { key: "cancelled", label: "5. Annulée", color: "hover:border-red-400" },
-                  ].map(st => (
-                    <Button
-                      key={st.key}
-                      variant="outline"
-                      size="sm"
-                      disabled={isUpdatingStatus}
-                      onClick={() => handleStatusChange(selectedOrder.id, st.key as OrderStatus)}
-                      className={`text-xs rounded-none transition-all ${
-                        selectedOrder.status === st.key
-                          ? "bg-luxury-charcoal text-white border-luxury-charcoal"
-                          : `bg-white text-luxury-gray border-black/10 ${st.color}`
-                      }`}
-                    >
-                      {st.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Articles commandés */}
-              <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-luxury-charcoal mb-3">
-                  Articles dans le colis
-                </h4>
-                <div className="border border-black/10 divide-y divide-black/5">
-                  {(selectedOrder.order_items || []).map((item, idx) => (
-                    <div key={idx} className="p-3.5 flex items-center justify-between gap-4 bg-white">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-luxury-sand border border-black/5 flex items-center justify-center overflow-hidden shrink-0">
-                          {item.products?.image ? (
-                            <img src={item.products.image} alt={item.products.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <Package className="w-5 h-5 text-luxury-gray" />
-                          )}
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-luxury-charcoal">{item.products?.name || "Smartphone"}</p>
-                          <p className="text-xs text-luxury-gray">{item.variant_label || "Configuration Standard"}</p>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <p className="text-sm font-mono font-bold text-luxury-charcoal">
-                          {formatPrice(item.unit_price_dzd * item.qty)} DZD
-                        </p>
-                        <p className="text-xs text-luxury-gray">
-                          {item.qty} × {formatPrice(item.unit_price_dzd)} DZD
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-
-                  {/* Ligne Total */}
-                  <div className="p-4 bg-[#faf9f7] flex items-center justify-between">
-                    <div>
-                      <span className="text-xs text-luxury-gray">Mode de règlement :</span>
-                      <p className="text-xs font-bold text-luxury-charcoal">Paiement à la livraison (Cash on Delivery)</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-xs text-luxury-gray">Total TTC à encaisser :</span>
-                      <p className="text-xl font-mono font-black text-luxury-charcoal">
-                        {formatPrice(selectedOrder.total_dzd)} DZD
-                      </p>
-                    </div>
-                  </div>
+                <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center font-bold text-sm">
+                  <span className="text-slate-700">Total Net TTC</span>
+                  <span className="font-mono text-lg text-slate-900">{formatPrice(selectedOrder.total_dzd)} DZD</span>
                 </div>
               </div>
             </div>
 
-            <DialogFooter className="flex flex-row justify-between border-t border-black/5 pt-4">
+            <DialogFooter className="border-t border-slate-100 pt-4 flex sm:justify-between items-center">
               <Button
                 variant="outline"
                 onClick={() => window.print()}
-                className="rounded-none border-black/10 text-xs"
+                className="rounded-xl border-slate-200 text-xs font-semibold gap-2"
               >
-                <Printer className="w-3.5 h-3.5 mr-1.5" />
-                Imprimer le bon de livraison
+                <Printer size={14} />
+                Imprimer Bon de Commande
               </Button>
-
               <Button
                 onClick={() => setSelectedOrder(null)}
-                className="bg-luxury-charcoal text-white hover:bg-black rounded-none text-xs"
+                className="rounded-xl bg-[#0a0a14] text-white text-xs font-semibold"
               >
                 Fermer
               </Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
-      )}
+        )}
+      </Dialog>
     </div>
   );
 }
